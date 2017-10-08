@@ -9,15 +9,15 @@ public class AudioManager : MonoBehaviour {
     public const string MainBG = "MainBGM";
     public const string BattleBG = "BattleBGM";
 
+    public static float BgVolume{get{return bgVolume;}set{bgVolume = value;}}
+    public static bool IsSoundOn{get{return isSoundOn;}set{isSoundOn = value;}}
+
     //记录当前播放的声音物体名 object name that currently playing audio
-    private static string currrentBG = "";
+    static string currrentBG = "";
 
     //声明音量字段 volume
     static float bgVolume;
     static bool isSoundOn;
-
-    public static float BgVolume{get{return bgVolume;}set{bgVolume = value;}}
-    public static bool IsSoundOn{get{return isSoundOn;}set{isSoundOn = value;}}
 
     //建立声音数据库 audio database
     private static Dictionary<string, AudioSource> AudioSources = new Dictionary<string, AudioSource>();
@@ -46,6 +46,7 @@ public class AudioManager : MonoBehaviour {
             if (bgName == currrentBG)
             {
                 AudioSources[bgName].Stop();
+                break;
             }
         }
 

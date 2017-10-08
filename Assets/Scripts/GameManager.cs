@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
-public class GameManager : MonoBehaviour {
+public class GameManager :MonoBehaviour {
 
     //存储所有UI物体名------下一版本将战斗界面独立到另一个Scene，DontDestroyOnLoad()
     public const string LOGIN = "Login";
@@ -22,6 +22,9 @@ public class GameManager : MonoBehaviour {
     public static User user;            //用户数据
     public static string FilePathName;  //存档地址
     public static Dictionary<string, GameObject> UIS = new Dictionary<string, GameObject>();        //建立UI数据库
+
+    public static GameObject Battle;
+    public static Battle_C BC;
 
     void Awake () {
         Debug.Log("GameManager.start");
@@ -67,7 +70,7 @@ public class GameManager : MonoBehaviour {
         //创建存档文件夹
         IOHelper.CreateDirectory(dirpath);
         //定义存档文件路径
-        string filename = dirpath + "/GameData.sav";
+        string filename = dirpath + "/Zombie_GameData.sav";
         FilePathName = filename;
 
         //如果文件存在，读档
@@ -94,6 +97,9 @@ public class GameManager : MonoBehaviour {
         UIS.Add(CAMPAIGN, GameObject.Find(CAMPAIGN));
         UIS.Add(CAMPAIGNRESULT, GameObject.Find(CAMPAIGNRESULT));
         UIS.Add(BATTLE, GameObject.Find(BATTLE));
+
+        Battle = GameObject.Find(BATTLE);
+        BC = Battle.GetComponent<Battle_C>();
 
         //设置界面的初始位置
         /*

@@ -3,29 +3,19 @@ using System.Collections;
 
 public class Modes_C : MonoBehaviour {
 
-    GameObject Modes_BackBtn;
-    GameObject Modes_CampaignBtn;
-    GameObject Modes_ContinueBtn;
-    GameObject Modes_TrialBtn;
-    GameObject Modes_RandomBtn;
+    public GameObject Modes_BackBtn;
+    public GameObject Modes_CampaignBtn;
+    public GameObject Modes_ContinueBtn;
+    public GameObject Modes_TrialBtn;
+    public GameObject Modes_RandomBtn;
 
     private void Start()
     {
-        Modes_BackBtn = GameObject.Find("Modes_BackBtn");
         UIEventListener.Get(Modes_BackBtn).onClick = Modes_BackBtn_Click;
-
-        Modes_CampaignBtn = GameObject.Find("Modes_CampaignBtn");
         UIEventListener.Get(Modes_CampaignBtn).onClick = Modes_CampaignBtn_Click;
-
-        Modes_ContinueBtn = GameObject.Find("Modes_ContinueBtn");
         UIEventListener.Get(Modes_ContinueBtn).onClick = Modes_ContinueBtn_Click;
-
-        Modes_TrialBtn = GameObject.Find("Modes_TrialBtn");
         UIEventListener.Get(Modes_TrialBtn).onClick = Modes_TrialBtn_Click;
-
-        Modes_RandomBtn = GameObject.Find("Modes_RandomBtn");
         UIEventListener.Get(Modes_RandomBtn).onClick = Modes_RandomBtn_Click;
-
     }
 
     public void ButtonClick()

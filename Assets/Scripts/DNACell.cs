@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,10 +9,11 @@ public class DNACell : MonoBehaviour {
     public UILabel Name;
     public UILabel Lv;
     public UILabel Des;
-    public GameObject self_Cell;
+    public UILabel GLabel;
+    public UILabel CLabel;
+    public GameObject GoldUpgradeBtn;
+    public GameObject GemUpgradeBtn;
     DNA_C DNA_C;
-
-    private DNACell cell;
 
     //数据相关
     public int CellID;
@@ -20,27 +22,25 @@ public class DNACell : MonoBehaviour {
     private void Start()
     {
         DNA_C = GameObject.Find(GameManager.DNA).GetComponent<DNA_C>();
+        UIEventListener.Get(GoldUpgradeBtn).onClick = GoldUpgrade_Click;
+        UIEventListener.Get(GemUpgradeBtn).onClick = GemUpgrade_Click;
     }
 
-    public void GoldUpgrade_Click()
+    public void GoldUpgrade_Click(GameObject go)
     {
-        cell = self_Cell.GetComponent<DNACell>();
-        long gold_cost = 0;
+        int cellID = gameObject.GetComponent<DNACell>().CellID;
+        int gold_cost = int.Parse(GLabel.text);
 
         //消耗金币，这里进行金币消耗数的计算 consume gold
-        switch (cell.CellType)
+        switch (gameObject.GetComponent<DNACell>().CellType)
         {
             case DNAType.Virus:
-                Debug.Log("Virus LevelUp");
-                gold_cost = long.Parse(DataManager.DNAUp_Virus[cell.CellID].GoldCost) * GameManager.user.DB_u_dv[cell.CellID - 1].Lv;
-                Debug.Log("gold_cost = " + gold_cost);
-
                 //升级判断与处理 check upgrading
                 if (GameManager.user.Gold >= gold_cost)
                 {
                     //可以升级
                     GameManager.user.Gold -= gold_cost;
-                    GameManager.user.DB_u_dv[cell.CellID - 1].Lv += 1;
+                    GameManager.user.DB_u_dna[0][cellID - 1].Lv += 1;
 
                     //存档
                     GameManager.SaveData();
@@ -55,16 +55,12 @@ public class DNACell : MonoBehaviour {
 
                 break;
             case DNAType.Human:
-                Debug.Log("Human LevelUp");
-                gold_cost = long.Parse(DataManager.DNAUp_Virus[cell.CellID].GoldCost) * GameManager.user.DB_u_dh[cell.CellID - 1].Lv;
-                Debug.Log("gold_cost = " + gold_cost);
-
                 //升级判断与处理
                 if (GameManager.user.Gold >= gold_cost)
                 {
                     //可以升级
                     GameManager.user.Gold -= gold_cost;
-                    GameManager.user.DB_u_dh[cell.CellID - 1].Lv += 1;
+                    GameManager.user.DB_u_dna[1][cellID - 1].Lv += 1;
 
                     //存档
                     GameManager.SaveData();
@@ -79,16 +75,12 @@ public class DNACell : MonoBehaviour {
 
                 break;
             case DNAType.Zombie:
-                Debug.Log("Zombie LevelUp");
-                gold_cost = long.Parse(DataManager.DNAUp_Virus[cell.CellID].GoldCost) * GameManager.user.DB_u_dz[cell.CellID - 1].Lv;
-                Debug.Log("gold_cost = " + gold_cost);
-
                 //升级判断与处理
                 if (GameManager.user.Gold >= gold_cost)
                 {
                     //可以升级
                     GameManager.user.Gold -= gold_cost;
-                    GameManager.user.DB_u_dz[cell.CellID - 1].Lv += 1;
+                    GameManager.user.DB_u_dna[2][cellID - 1].Lv += 1;
 
                     //存档
                     GameManager.SaveData();
@@ -106,25 +98,21 @@ public class DNACell : MonoBehaviour {
 
     }
 
-    public void GemUpgrade_Click()
+    public void GemUpgrade_Click(GameObject go)
     {
-        cell = self_Cell.GetComponent<DNACell>();
-        long gem_cost = 0;
+        int cellID = gameObject.GetComponent<DNACell>().CellID;
+        int gem_cost = int.Parse(CLabel.text);
 
         //消耗金币，这里进行金币消耗数的计算
-        switch (cell.CellType)
+        switch (gameObject.GetComponent<DNACell>().CellType)
         {
             case DNAType.Virus:
-                Debug.Log("Virus LevelUp");
-                gem_cost = long.Parse(DataManager.DNAUp_Virus[cell.CellID].GemCost) * GameManager.user.DB_u_dv[cell.CellID - 1].Lv;
-                Debug.Log("gem_cost = " + gem_cost);
-
                 //升级判断与处理
                 if (GameManager.user.Gem >= gem_cost)
                 {
                     //可以升级
                     GameManager.user.Gem -= gem_cost;
-                    GameManager.user.DB_u_dv[cell.CellID - 1].Lv += 1;
+                    GameManager.user.DB_u_dna[0][cellID - 1].Lv += 1;
 
                     //存档
                     GameManager.SaveData();
@@ -139,16 +127,12 @@ public class DNACell : MonoBehaviour {
 
                 break;
             case DNAType.Human:
-                Debug.Log("Human LevelUp");
-                gem_cost = long.Parse(DataManager.DNAUp_Human[cell.CellID].GemCost) * GameManager.user.DB_u_dh[cell.CellID - 1].Lv;
-                Debug.Log("gem_cost = " + gem_cost);
-
                 //升级判断与处理
                 if (GameManager.user.Gem >= gem_cost)
                 {
                     //可以升级
                     GameManager.user.Gem -= gem_cost;
-                    GameManager.user.DB_u_dh[cell.CellID - 1].Lv += 1;
+                    GameManager.user.DB_u_dna[1][cellID - 1].Lv += 1;
 
                     //存档
                     GameManager.SaveData();
@@ -163,16 +147,12 @@ public class DNACell : MonoBehaviour {
 
                 break;
             case DNAType.Zombie:
-                Debug.Log("Zombie LevelUp");
-                gem_cost = long.Parse(DataManager.DNAUp_Zombie[cell.CellID].GemCost) * GameManager.user.DB_u_dz[cell.CellID - 1].Lv;
-                Debug.Log("gem_cost = " + gem_cost);
-
                 //升级判断与处理
                 if (GameManager.user.Gem >= gem_cost)
                 {
                     //可以升级
                     GameManager.user.Gem -= gem_cost;
-                    GameManager.user.DB_u_dz[cell.CellID - 1].Lv += 1;
+                    GameManager.user.DB_u_dna[2][cellID - 1].Lv += 1;
 
                     //存档
                     GameManager.SaveData();

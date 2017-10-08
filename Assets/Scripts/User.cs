@@ -6,10 +6,10 @@ using System;
 [Serializable]
 public class User
 {
+    const long INIT_GOLD = 9876;
+    const long INIT_GEM = 6789;
     //用户属性字段 user attribute
-    public List<U_DNA_Virus> DB_u_dv = new List<U_DNA_Virus>();
-    public List<U_DNA_Human> DB_u_dh = new List<U_DNA_Human>();
-    public List<U_DNA_Zombie> DB_u_dz = new List<U_DNA_Zombie>();
+    public List<U_DNA>[] DB_u_dna = new List<U_DNA>[3]; //Index 0:Virus 1:Human 2:Zombie
 
     public long Gold;
     public long Gem;
@@ -31,26 +31,29 @@ public class User
     public User Init()
     {
         Debug.Log("Init User");
-        
+        for(int i = 0; i < DB_u_dna.Length; i++)
+        {
+            DB_u_dna[i] = new List<U_DNA>();
+        }
         //按照表格大小新建用户数据
         for (int i = 1; i < DataManager.DNAUp_Virus.Count; i++)
         {
-            DB_u_dv.Add(new U_DNA_Virus(i));
+            DB_u_dna[0].Add(new U_DNA(i, DataManager.DNAUp_Virus));
         }      
         
         for (int i = 1; i < DataManager.DNAUp_Human.Count; i++)
         {
-            DB_u_dh.Add(new U_DNA_Human(i));
+            DB_u_dna[1].Add(new U_DNA(i,DataManager.DNAUp_Human));
         }
 
         for (int i = 1; i < DataManager.DNAUp_Zombie.Count; i++)
         {
-            DB_u_dz.Add(new U_DNA_Zombie(i));
+            DB_u_dna[2].Add(new U_DNA(i,DataManager.DNAUp_Zombie));
             //初始解锁一种Zombie
         }
 
-        Gold = 9876;
-        Gem = 6789;
+        Gold = INIT_GOLD;
+        Gem = INIT_GEM;
 
         for(int i = 1; i < DataManager.Model_Virus.Count; i++)
         {
@@ -78,6 +81,11 @@ public class User
     {
         Debug.Log("DeSerialize User");
 
+        for (int i = 0; i < DB_u_dna.Length; i++)
+        {
+            DB_u_dna[i] = new List<U_DNA>();
+        }
+
         //按照表格大小为数量，进行字段的类型转换
         for (int i = 1; i < DataManager.DNAUp_Virus.Count; i++)
         {
@@ -89,23 +97,23 @@ public class User
             if (f.DB_u_dv[i - 1] != null)
             */
 
-            DB_u_dv.Add(new U_DNA_Virus(i));
-            DB_u_dv[i - 1].ID = int.Parse(f.DB_u_dv[i - 1].ID);
-            DB_u_dv[i - 1].Lv = int.Parse(f.DB_u_dv[i - 1].Lv);
+            DB_u_dna[0].Add(new U_DNA(i,DataManager.DNAUp_Virus));
+            DB_u_dna[0][i - 1].ID = int.Parse(f.DB_u_dna[0][i - 1].ID);
+            DB_u_dna[0][i - 1].Lv = int.Parse(f.DB_u_dna[0][i - 1].Lv);
         }
 
         for (int i = 1; i < DataManager.DNAUp_Human.Count; i++)
         {
-            DB_u_dh.Add(new U_DNA_Human(i));
-            DB_u_dh[i - 1].ID = int.Parse(f.DB_u_dh[i - 1].ID);
-            DB_u_dh[i - 1].Lv = int.Parse(f.DB_u_dh[i - 1].Lv);
+            DB_u_dna[1].Add(new U_DNA(i,DataManager.DNAUp_Human));
+            DB_u_dna[1][i - 1].ID = int.Parse(f.DB_u_dna[1][i - 1].ID);
+            DB_u_dna[1][i - 1].Lv = int.Parse(f.DB_u_dna[1][i - 1].Lv);
         }
 
         for (int i = 1; i < DataManager.DNAUp_Zombie.Count; i++)
         {
-            DB_u_dz.Add(new U_DNA_Zombie(i));
-            DB_u_dz[i - 1].ID = int.Parse(f.DB_u_dz[i - 1].ID);
-            DB_u_dz[i - 1].Lv = int.Parse(f.DB_u_dz[i - 1].Lv);
+            DB_u_dna[2].Add(new U_DNA(i,DataManager.DNAUp_Zombie));
+            DB_u_dna[2][i - 1].ID = int.Parse(f.DB_u_dna[2][i - 1].ID);
+            DB_u_dna[2][i - 1].Lv = int.Parse(f.DB_u_dna[2][i - 1].Lv);
         }
 
         Gold = long.Parse(f.Gold);
@@ -138,46 +146,16 @@ public class User
 }
 
 [Serializable]
-public class U_DNA_Virus
+public class U_DNA
 {
     //存储的字段
     public int ID;
     public int Lv;
 
-    public U_DNA_Virus(int row)
+    public U_DNA(int row,List<DNAUp_Sheet> dnaSheet)
     {
         //把每项可升级属性的等级设为1
-        this.ID = int.Parse(DataManager.DNAUp_Virus[row].ID);
-        this.Lv = 1;
-    }
-}
-
-[Serializable]
-public class U_DNA_Human
-{
-    //存储的字段
-    public int ID;
-    public int Lv;
-
-    public U_DNA_Human(int row)
-    {
-        //把每项可升级属性的等级设为1
-        this.ID = int.Parse(DataManager.DNAUp_Human[row].ID);
-        this.Lv = 1;
-    }
-}
-
-[Serializable]
-public class U_DNA_Zombie
-{
-    //存储的字段
-    public int ID;
-    public int Lv;
-
-    public U_DNA_Zombie(int row)
-    {
-        //把每项可升级属性的等级设为1
-        this.ID = int.Parse(DataManager.DNAUp_Zombie[row].ID);
+        this.ID = int.Parse(dnaSheet[row].ID);
         this.Lv = 1;
     }
 }
@@ -202,9 +180,7 @@ public class U_MissionFlag
 public class F_User
 {
     //用户属性字段
-    public List<F_U_DNA_Virus> DB_u_dv = new List<F_U_DNA_Virus>();
-    public List<F_U_DNA_Human> DB_u_dh = new List<F_U_DNA_Human>();
-    public List<F_U_DNA_Zombie> DB_u_dz = new List<F_U_DNA_Zombie>();
+    public List<F_U_DNA>[] DB_u_dna = new List<F_U_DNA>[3];
 
     public string Gold;
     public string Gem;
@@ -215,21 +191,7 @@ public class F_User
     public List<string> DB_u_UnlockedZombies = new List<string>();
 }
 
-public class F_U_DNA_Virus
-{
-    //存储的字段
-    public string ID;
-    public string Lv;
-}
-
-public class F_U_DNA_Human
-{
-    //存储的字段
-    public string ID;
-    public string Lv;
-}
-
-public class F_U_DNA_Zombie
+public class F_U_DNA
 {
     //存储的字段
     public string ID;

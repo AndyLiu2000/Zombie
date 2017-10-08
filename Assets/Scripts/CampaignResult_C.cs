@@ -25,15 +25,11 @@ public class CampaignResult_C : MonoBehaviour {
     public int InfectKillNum = 0;
     public int ZombieKillNum = 0;
 
-    Battle_C Battle;
-    GameObject CampaignResult_BackBtn;
+    public GameObject CampaignResult_BackBtn;
     List<Loot_Sheet> loot = new List<Loot_Sheet>();
 
     private void Start()
     {
-        Battle = GameObject.Find("Battle").GetComponent<Battle_C>();
-
-        CampaignResult_BackBtn = GameObject.Find("CampaignResult_BackBtn");
         UIEventListener.Get(CampaignResult_BackBtn).onClick = CampaignResult_BackBtn_Click;
     }
 
@@ -42,9 +38,10 @@ public class CampaignResult_C : MonoBehaviour {
         //产生掉落 generate loot
         foreach(Mission_Sheet ms in DataManager.Mission_Parameter)
         {
-            if(ms.MissionID == Battle.MissionID.ToString())
+            if(ms.MissionID == GameManager.BC.MissionID.ToString())
             {
                 loot = Formula.Loot(ms.LootPackageID);
+                break;
             }
         }
 
@@ -67,10 +64,10 @@ public class CampaignResult_C : MonoBehaviour {
         LabelGem.text = lootGem.ToString();
 
         //数据传递 receive data
-        TimeSecond = (int)(Battle.TimeSecond);
-        InfectNum = Battle.InfectNum;
-        InfectKillNum = Battle.InfectKillNum;
-        ZombieKillNum = Battle.ZombieKillNum;
+        TimeSecond = (int)(GameManager.BC.TimeSecond);
+        InfectNum = GameManager.BC.InfectNum;
+        InfectKillNum = GameManager.BC.InfectKillNum;
+        ZombieKillNum = GameManager.BC.ZombieKillNum;
 
         LabelFlag.text = LocalizationEx.LoadLanguageTextName("BattleResult");
         LabelTime.text = LocalizationEx.LoadLanguageTextName("BattleTime");
@@ -78,7 +75,7 @@ public class CampaignResult_C : MonoBehaviour {
         LabelInfectKill.text = LocalizationEx.LoadLanguageTextName("InfectKill");
         LabelZombieKill.text = LocalizationEx.LoadLanguageTextName("ZombieKill");
 
-        LabelFlagResult.text = ResultFlag.ToString();
+        LabelFlagResult.text = ResultFlag? "Win":"Lose";
         LabelTimeSecond.text = TimeSecond.ToString();
         LabelInfectNum.text = InfectNum.ToString();
         LabelInfectKillNum.text = InfectKillNum.ToString();

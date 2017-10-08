@@ -52,7 +52,7 @@ public class Battle_C : MonoBehaviour {
     public float Medicine = 0;              //解药当前进度
     public float MedicineWork = MEDICINEWORK;       //解药总进度
     public bool medicineOK = false;
-    GameObject MedicineBar;
+    
     public BattleState BattleState;
     public bool Result = false;
     public int StrategyPoint;
@@ -69,16 +69,18 @@ public class Battle_C : MonoBehaviour {
     //物件引用
     public GameObject StrategyBtn;
     public GameObject LabelStrategy;
-    GameObject Battle;
-    GameObject Entity;
-    GameObject EndBattleBtn;
-    GameObject InGameUpgradePanel;
-    GameObject UpgradeMap;
-    GameObject VirusUpBtn;
-    GameObject HumanUpBtn;
-    GameObject ZombieUpBtn;
-    GameObject EvolutionBtn;
-    GameObject SpeedBtn;
+    public GameObject Battle;
+    public GameObject Entity;
+    public GameObject EndBattleBtn;
+    public GameObject InGameUpgradePanel;
+    public GameObject UpgradeMap;
+    public GameObject VirusUpBtn;
+    public GameObject HumanUpBtn;
+    public GameObject ZombieUpBtn;
+    public GameObject EvolutionBtn;
+    public GameObject SpeedBtn;
+    public GameObject strategyCloseBtn;
+    public GameObject MedicineBar;
     UILabel Label_EvolutionDes;
     UILabel LabelEvolutionCost;
     UILabel LabelSpeed;
@@ -115,35 +117,13 @@ public class Battle_C : MonoBehaviour {
 
     private void Start()
     {
-        Battle = GameObject.Find(GameManager.BATTLE);
-        EndBattleBtn = GameObject.Find("EndBattleBtn");
         UIEventListener.Get(EndBattleBtn).onClick = EndBattleBtn_Click;
-
         UIEventListener.Get(StrategyBtn).onClick = StrategyBtn_Click;
-
-        EvolutionBtn = GameObject.Find("EvolutionBtn");
         UIEventListener.Get(EvolutionBtn).onClick = EvolutionBtn_Click;
-
-        SpeedBtn = GameObject.Find("SpeedBtn");
         UIEventListener.Get(SpeedBtn).onClick = SpeedBtn_Click;
-
-        MedicineBar = GameObject.Find("MedicineBar");
-
-        Entity = GameObject.Find("Entity");
-        InGameUpgradePanel = GameObject.Find("InGameUpgrade");
-
-        UpgradeMap = GameObject.Find("UpgradeMap");
-
-        VirusUpBtn = GameObject.Find("VirusUpBtn");
         UIEventListener.Get(VirusUpBtn).onClick = VirusUpBtn_Click;
-
-        HumanUpBtn = GameObject.Find("HumanUpBtn");
         UIEventListener.Get(HumanUpBtn).onClick = HumanUpBtn_Click;
-
-        ZombieUpBtn = GameObject.Find("ZombieUpBtn");
         UIEventListener.Get(ZombieUpBtn).onClick = ZombieUpBtn_Click;
-
-        GameObject strategyCloseBtn = GameObject.Find("StrategyCloseBtn");
         UIEventListener.Get(strategyCloseBtn).onClick = StrategyCloseBtn_Click;
 
         Label_EvolutionDes = GameObject.Find("Label_EvolutionDes").GetComponent<UILabel>();
@@ -192,7 +172,7 @@ public class Battle_C : MonoBehaviour {
 
         LoadEntity(VirusID,MissionID);
         LoadBattleEvent(MissionID);
-        //LoadBattleStrategy();
+        LoadBattleStrategy("1");
 
         BattleState = BattleState.Start;
     }
@@ -206,6 +186,8 @@ public class Battle_C : MonoBehaviour {
         //随机生成人类数据，矩阵排布，临时方案 temporary resolution. line all humans in matrix
         int row = int.Parse(DataManager.Mission_Parameter[MissionID].DistributionParam1);
         int column = int.Parse(DataManager.Mission_Parameter[MissionID].DistributionParam2);
+        int width = HumanModel.transform.GetChild(0).GetComponent<UISprite>().width;
+        int height = HumanModel.transform.GetChild(0).GetComponent<UISprite>().height;
         for (int i = 0; i < row; i++)
         {
             for (int j = 0; j < column; j++)
@@ -213,7 +195,7 @@ public class Battle_C : MonoBehaviour {
                 HumanModel.GetComponent<Human>().CreatHuman(curMissionID);
 
                 GameObject hm = NGUITools.AddChild(Entity, HumanModel);
-                Vector3 pos = new Vector3((-column / 2 + j) * HumanModel.GetComponent<Human>().Image.width, (-row / 2 + i) * HumanModel.GetComponent<Human>().Image.height, 0);
+                Vector3 pos = new Vector3((-column / 2 + j) * width, (-row / 2 + i) * height + height / 2,0);
                 hm.transform.localPosition = pos;
 
                 NGUITools.SetDirty(Entity);
@@ -248,8 +230,9 @@ public class Battle_C : MonoBehaviour {
                     GeneModel.GetComponent<Gene>().CreateGene(bss.GeneID);
                     gm = NGUITools.AddChild(UpgradeMap, GeneModel);
                     gm.GetComponent<UISprite>().depth = 10;
-                    gm.transform.localPosition = GeneModel.GetComponent<Gene>().Pos;
+                    gm.transform.localPosition = gm.GetComponent<Gene>().Pos;
                     gm.SetActive(gm.GetComponent<Gene>().IsVisible);
+                    //gm.SetActive(true);
 
                     switch (bss.BoardID)
                     {
@@ -307,7 +290,7 @@ public class Battle_C : MonoBehaviour {
     void EvolutionBtn_Click(GameObject button)
     {
         Debug.Log("基因进化处理");
-        Debug.Log("GeneSelected.sp = "+ Formula.StrategyPointCal(GeneSelected));
+        if (GeneSelected == null) return;
         if(BC.StrategyPoint >= Formula.StrategyPointCal(GeneSelected) && GeneSelected.IsUpgradable && !GeneSelected.IsUpgraded)
         {
             //消耗策略点 consume sp
@@ -353,7 +336,7 @@ public class Battle_C : MonoBehaviour {
             Debug.Log("BattleState.Start");
             MedicineBar.GetComponent<UISlider>().value = BC.Medicine / BC.MedicineWork;
 
-            LabelStrategyPoint.GetComponent<UILabel>().text = string.Format("StrategyPoint:" + BC.StrategyPoint);
+            LabelStrategyPoint.GetComponent<UILabel>().text = BC.StrategyPoint.ToString();
         }
 
         if (BattleState == BattleState.Game)
@@ -373,7 +356,7 @@ public class Battle_C : MonoBehaviour {
             {
                 Debug.Log("进入随机出现气泡");
                 float random = UnityEngine.Random.Range(0.0f, 1.0f);
-                if (random > 0.1f)
+                if (random > 0.1f && HumanArray.Count > 0)
                 {
                     //出现黄色气泡 yellow bubble
                     Debug.Log("出现黄色气泡");
@@ -444,7 +427,7 @@ public class Battle_C : MonoBehaviour {
             }
 
 
-            LabelStrategyPoint.GetComponent<UILabel>().text = string.Format("StrategyPoint:" + BC.StrategyPoint);
+            LabelStrategyPoint.GetComponent<UILabel>().text = BC.StrategyPoint.ToString();
 
             //通用规则模块
 
@@ -488,6 +471,7 @@ public class Battle_C : MonoBehaviour {
                                 m.Flag = true;
                                 Debug.Log("m.VirusID = " + m.VirusID + ",  m.MissionID = " + m.MissionID);
                                 GameManager.SaveData();
+                                break;
                             }
                         }
 
@@ -552,6 +536,14 @@ public class Battle_C : MonoBehaviour {
                 }
             }
             EndBattleBtn.SetActive(true);
+            if (BC.Result)
+            {
+                EndBattleBtn.transform.GetChild(0).GetComponent<UILabel>().text = "You Win";
+            }
+            else
+            {
+                EndBattleBtn.transform.GetChild(0).GetComponent<UILabel>().text = "You Lose";
+            }
         }
     }
 
@@ -643,8 +635,8 @@ public class Battle_C : MonoBehaviour {
 
         if (Accelarate)
         {
-            LabelSpeed.text = "X 2";
-            Time.timeScale = 2.0f;
+            LabelSpeed.text = "X 4";
+            Time.timeScale = 4.0f;
         }
         else
         {

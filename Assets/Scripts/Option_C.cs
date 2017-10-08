@@ -4,33 +4,24 @@ using System.Collections;
 public class Option_C : MonoBehaviour {
 
     public UILabel LabelOption;
+    public UILabel LabelLanguageName;
+    public UILabel LabelLanguage;
+    public GameObject MusicBar;
+    public GameObject SoundSwitch;
+    public GameObject Option_BackBtn;
+    public GameObject LanguageRight;
+    public GameObject LanguageLeft;
 
     private UISlider musicBarSlider;
     private UIToggle soundToggle;
 
-    GameObject Option_BackBtn;
-    GameObject LanguageRight;
-    GameObject LanguageLeft;
-    UILabel LabelLanguageName;
-    UILabel LabelLanguage;
-
     void Start() {
-        
-        musicBarSlider = GameObject.Find("MusicBar").GetComponent<UISlider>();
-        soundToggle = GameObject.Find("SoundSwitch").GetComponent<UIToggle>();
+        musicBarSlider = MusicBar.GetComponent<UISlider>();
+        soundToggle = SoundSwitch.GetComponent<UIToggle>();
 
-        Option_BackBtn = GameObject.Find("Option_BackBtn");
         UIEventListener.Get(Option_BackBtn).onClick = Option_BackBtn_Click;
-
-        LanguageRight = GameObject.Find("LanguageRight");
         UIEventListener.Get(LanguageRight).onClick = LanguageRight_Click;
-
-        LanguageLeft = GameObject.Find("LanguageLeft");
         UIEventListener.Get(LanguageLeft).onClick = LanguageLeft_Click;
-
-        LabelLanguageName = GameObject.Find("LanguagName").GetComponent<UILabel>();
-
-        LabelLanguage = GameObject.Find("Language").GetComponent<UILabel>();
 
         //musicBarSlider.value = AudioManager.BgVolume;
         //soundToggle.value = AudioManager.IsSoundOn;

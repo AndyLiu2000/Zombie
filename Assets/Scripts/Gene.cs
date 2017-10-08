@@ -24,7 +24,6 @@ public class Gene : MonoBehaviour {
     public bool IsUpgraded = false;
 
     //预制体相关
-    public GameObject SelfPrefabs;
     GameObject EvolutionBtn;
     Gene self;
     UILabel LabelEvolutionCost;
@@ -42,9 +41,9 @@ public class Gene : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        self = SelfPrefabs.GetComponent<Gene>();
+        self = gameObject.GetComponent<Gene>();
 
-        UIEventListener.Get(SelfPrefabs).onClick = SelfBtn_Click;
+        UIEventListener.Get(gameObject).onClick = SelfBtn_Click;
 
         Battle = GameObject.Find(GameManager.BATTLE).GetComponent<Battle_C>();
 
@@ -57,30 +56,26 @@ public class Gene : MonoBehaviour {
 	
 	public void CreateGene(string geneID)
     {
-        //Battle = GameObject.Find(GameManager.BATTLE).GetComponent<Battle_C>();
-
         GeneID = geneID;
-        BattleStrategy_Sheet bs = new BattleStrategy_Sheet();
         //根据GeneID遍历查找基因
         foreach (BattleStrategy_Sheet bss in DataManager.BattleStrategy_Strategy)
         {
             if (bss.GeneID == GeneID)
             {
-                bs = bss;
+                //基因值
+                StrategyID = bss.StrategyID;
+                BoardID = bss.BoardID;
+                EventID = bss.EventID;
+                Row = int.Parse(bss.Row);
+                Column = int.Parse(bss.Column);
+                FP1 = bss.FP1;
+                FP2 = bss.FP2;
+                UnlockCost_A = int.Parse(bss.UnlockCost_A);
+                UnlockCost_B = int.Parse(bss.UnlockCost_B);
+
                 break;
             }
         }
-
-        //基因值
-        StrategyID = bs.StrategyID;
-        BoardID = bs.BoardID;
-        EventID = bs.EventID;
-        Row = int.Parse(bs.Row);
-        Column = int.Parse(bs.Column);
-        FP1 = bs.FP1;
-        FP2 = bs.FP2;
-        UnlockCost_A = int.Parse(bs.UnlockCost_A);
-        UnlockCost_B = int.Parse(bs.UnlockCost_B);
 
         IsVisible = false;
         IsUpgraded = false;
@@ -175,11 +170,11 @@ public class Gene : MonoBehaviour {
                 IsUpgradable = false;
             }
 
-            SelfPrefabs.SetActive(IsVisible);
+            gameObject.SetActive(IsVisible);
         }
         else
         {
-            SelfPrefabs.SetActive(false);
+            gameObject.SetActive(false);
         }
     }
 
@@ -192,9 +187,10 @@ public class Gene : MonoBehaviour {
             if (ige.EventID == EventID)
             {
                 Label_EvolutionDes.text = LocalizationEx.LoadLanguageTextName(ige.UpgradeEffectID);
+                break;
             }
         }
-        //未进化过显示进化消耗
+        //未进化过,显示进化消耗
         if (!IsUpgraded)
         {
             foreach (BattleStrategy_Sheet bs in DataManager.BattleStrategy_Strategy)
@@ -202,10 +198,19 @@ public class Gene : MonoBehaviour {
                 if (bs.GeneID == GeneID)
                 {
                     LabelEvolutionCost.text = Formula.StrategyPointCal(this).ToString();
+                    break;
                 }
             }
 
-            Formula.ChangeButtonEnable(EvolutionBtn);
+            if(Battle.StrategyPoint >= Formula.StrategyPointCal(self))
+            {
+                Formula.ChangeButtonEnable(EvolutionBtn);
+            }
+            else
+            {
+                Formula.ChangeButtonDisable(EvolutionBtn);
+            }
+            
         }
         //已进化过不显示数值 upgraded gene doesn't show cost value
         else

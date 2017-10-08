@@ -8,7 +8,6 @@ public class VirusSelectCell : MonoBehaviour {
     public UILabel LabelVirusDes;
     public UILabel LabelMissionIndex;
 
-    public GameObject self_Cell;
     private VirusSelectCell cell;
 
     //数据相关
@@ -16,7 +15,7 @@ public class VirusSelectCell : MonoBehaviour {
 
     public void Cell_Click()
     {
-        cell = self_Cell.GetComponent<VirusSelectCell>();
+        cell = gameObject.GetComponent<VirusSelectCell>();
 
         GameManager.ChangePanel(GameManager.UIS[GameManager.VIRUSSELECT], GameManager.UIS[GameManager.CAMPAIGN], cell.CellID);
 

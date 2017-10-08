@@ -4,11 +4,10 @@ using System.Collections;
 public class Login_C : MonoBehaviour {
 
     public UILabel LoginLabel;
-    GameObject Login_StartBtn;
+    public GameObject Login_StartBtn;
 
     private void Start()
     {
-        Login_StartBtn = GameObject.Find("Login_StartBtn");
         UIEventListener.Get(Login_StartBtn).onClick = Login_StartBtn_Click;
     }
 
@@ -16,7 +15,6 @@ public class Login_C : MonoBehaviour {
     public void enter()
     {
         LoginLabel.text = LocalizationEx.LoadLanguageTextName("Login");
-
     }
 
     public void Login_StartBtn_Click(GameObject button)

@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Zombie : MonoBehaviour{
+
+    private float ATTACK_INTERVAL = 1.0f;
+    private float HEALTH_INTERVAL = 1.0f;
+
     //Model：丧尸
     public float ZombieID;
     public int MaxHP;
@@ -10,22 +14,21 @@ public class Zombie : MonoBehaviour{
     public int Atk_M;
     public int Def_P;
     public int Def_M;
-    public float Speed;
-    public float HPDecay;
-    public float DrainLife;
-    public float AbilityID;
+    public int Speed;
+    public int HPDecay;
+    public int DrainLife;
+    public string AbilityID;
     public string Name;
     public string Res;
 
     //战斗变量
     public int HP;
-    public float ClimateBoost = 0;
-    public float EnviBoost = 0;
+    public int ClimateBoost = 0;
+    public int EnviBoost = 0;
     public Environment Envi;
     public Climate Clim;
 
     //预制体相关
-    public GameObject SelfModel;
     public GameObject HumanModel;
     private Zombie self;
     public UISprite Image;
@@ -36,30 +39,27 @@ public class Zombie : MonoBehaviour{
     public UISprite AbilityIcon;
 
     //环境变量
-    Battle_C Battle;
     float oneSecondDeltaTime = 0;
     float fiveSecondDeltaTime = 0;
 
     private void Start()
     {
-        self = SelfModel.GetComponent<Zombie>();
-
-        Battle = GameObject.Find(GameManager.BATTLE).GetComponent<Battle_C>();
+        self = gameObject.GetComponent<Zombie>();
     }
 
     private void FixedUpdate()
     {
-        if (Battle.BattleState == BattleState.Start)
+        if (GameManager.BC.BattleState == BattleState.Start)
         {
             //开始阶段的游戏提示显示
         }
 
-        if (Battle.BattleState == BattleState.Game)
+        if (GameManager.BC.BattleState == BattleState.Game)
         {
             oneSecondDeltaTime += Time.fixedDeltaTime;
 
             //失血
-            if (oneSecondDeltaTime >= 1.0f)
+            if (oneSecondDeltaTime >= HEALTH_INTERVAL)
             {
                 self.HP -= (int)Mathf.Round(HPDecay);
                 HPBar.GetComponent<UISlider>().value = (float)(HP * 1.0f / MaxHP);
@@ -72,16 +72,16 @@ public class Zombie : MonoBehaviour{
             }
 
             //每1秒攻击一次
-            if (oneSecondDeltaTime >= 1.0f)
+            if (oneSecondDeltaTime >= ATTACK_INTERVAL * 2) // 暂时不攻击 don't attack temporarily
             {
-                foreach (GameObject h in Battle.HumanArray)
+                foreach (GameObject h in GameManager.BC.HumanArray)
                 {
                     h.GetComponent<Human>().HP -= Atk_P * 100000;
                 }
             }
 
             //按秒执行操作
-            if (oneSecondDeltaTime >= 1.0f)
+            if (oneSecondDeltaTime >= ATTACK_INTERVAL)
             {
                 oneSecondDeltaTime = 0.0f;
             }
@@ -92,7 +92,7 @@ public class Zombie : MonoBehaviour{
             }
         }
 
-        if (Battle.BattleState == BattleState.End)
+        if (GameManager.BC.BattleState == BattleState.End)
         {
 
         }
@@ -101,8 +101,8 @@ public class Zombie : MonoBehaviour{
 
     void ZombieDie()
     {
-        Battle.ZombieArray.Remove(SelfModel);
-        Destroy(SelfModel);
+        GameManager.BC.ZombieArray.Remove(gameObject);
+        Destroy(gameObject);
     }
 
     public void CreateZombie(int zombieID, int curMissionID, Climate clim, Environment envi)
@@ -125,90 +125,90 @@ public class Zombie : MonoBehaviour{
         Atk_M = int.Parse(zombie.Atk_M);
         Def_P = int.Parse(zombie.Def_P);
         Def_M = int.Parse(zombie.Def_M);
-        Speed = float.Parse(zombie.Speed);
-        HPDecay = float.Parse(zombie.HPDecay);
-        DrainLife = float.Parse(zombie.DrainLife);
+        Speed = int.Parse(zombie.Speed);
+        HPDecay = int.Parse(zombie.HPDecay);
+        DrainLife = int.Parse(zombie.DrainLife);
 
         //根据随机分配到的气候和环境来决定使用哪个参数
         switch (clim)
         {
             case Climate.Dry:
-                ClimateBoost += float.Parse(zombie.ClimateBoost_1);
+                ClimateBoost = int.Parse(zombie.ClimateBoost_1);
                 break;
             case Climate.Wet:
-                ClimateBoost += float.Parse(zombie.ClimateBoost_2);
+                ClimateBoost = int.Parse(zombie.ClimateBoost_2);
                 break;
             case Climate.Normal:
-                ClimateBoost += float.Parse(zombie.ClimateBoost_3);
+                ClimateBoost = int.Parse(zombie.ClimateBoost_3);
                 break;
         }
 
         switch (envi)
         {
             case Environment.Hot:
-                EnviBoost += float.Parse(zombie.EnviBoost_1);
+                EnviBoost = int.Parse(zombie.EnviBoost_1);
                 break;
             case Environment.Cold:
-                EnviBoost += float.Parse(zombie.EnviBoost_2);
+                EnviBoost = int.Parse(zombie.EnviBoost_2);
                 break;
             case Environment.Balance:
-                EnviBoost += float.Parse(zombie.EnviBoost_3);
+                EnviBoost = int.Parse(zombie.EnviBoost_3);
                 break;
         }
 
         //DNA值
-        MaxHP = (int)(MaxHP * (1.0f + Formula.FieldNameToValue_Zombie("MaxHP")));
-        Atk_P = (int)(Atk_P * (1.0f + Formula.FieldNameToValue_Zombie("Atk_P")));
-        Atk_M = (int)(Atk_M * (1.0f + Formula.FieldNameToValue_Zombie("Atk_M")));
-        Def_P = (int)(Def_P * (1.0f + Formula.FieldNameToValue_Zombie("Def_P")));
-        Def_M = (int)(Def_M * (1.0f + Formula.FieldNameToValue_Zombie("Def_M")));
-        Speed = (int)(Speed * (1.0f + Formula.FieldNameToValue_Zombie("Speed")));
-        HPDecay = (int)(HPDecay * (1.0f + Formula.FieldNameToValue_Zombie("HPDecay")));
-        DrainLife = (int)(DrainLife * (1.0f + Formula.FieldNameToValue_Zombie("DrainLife")));
+        MaxHP = MaxHP * (1000 + Formula.FieldNameToValue("MaxHP",DataManager.DNAUp_Zombie, GameManager.user.DB_u_dna[2])) / 1000;
+        Atk_P = Atk_P * (1000 + Formula.FieldNameToValue("Atk_P", DataManager.DNAUp_Zombie, GameManager.user.DB_u_dna[2])) / 1000;
+        Atk_M = Atk_M * (1000 + Formula.FieldNameToValue("Atk_M", DataManager.DNAUp_Zombie, GameManager.user.DB_u_dna[2])) / 1000;
+        Def_P = Def_P * (1000 + Formula.FieldNameToValue("Def_P", DataManager.DNAUp_Zombie, GameManager.user.DB_u_dna[2])) / 1000;
+        Def_M = Def_M * (1000 + Formula.FieldNameToValue("Def_M", DataManager.DNAUp_Zombie, GameManager.user.DB_u_dna[2])) / 1000;
+        Speed = Speed * (1000 + Formula.FieldNameToValue("Speed", DataManager.DNAUp_Zombie, GameManager.user.DB_u_dna[2])) / 1000;
+        HPDecay = HPDecay * (1000 + Formula.FieldNameToValue("HPDecay", DataManager.DNAUp_Zombie, GameManager.user.DB_u_dna[2])) / 1000;
+        DrainLife = DrainLife * (1000 + Formula.FieldNameToValue("DrainLife", DataManager.DNAUp_Zombie, GameManager.user.DB_u_dna[2])) / 1000;
 
         //根据随机分配到的气候和环境来决定使用哪个参数
         switch (clim)
         {
             case Climate.Dry:
-                ClimateBoost += Formula.FieldNameToValue_Zombie("ClimateBoost_1");
+                ClimateBoost += Formula.FieldNameToValue("ClimateBoost_1", DataManager.DNAUp_Zombie, GameManager.user.DB_u_dna[2]);
                 break;
             case Climate.Wet:
-                ClimateBoost += Formula.FieldNameToValue_Zombie("ClimateBoost_2");
+                ClimateBoost += Formula.FieldNameToValue("ClimateBoost_2", DataManager.DNAUp_Zombie, GameManager.user.DB_u_dna[2]);
                 break;
             case Climate.Normal:
-                ClimateBoost += Formula.FieldNameToValue_Zombie("ClimateBoost_3");
+                ClimateBoost += Formula.FieldNameToValue("ClimateBoost_3", DataManager.DNAUp_Zombie, GameManager.user.DB_u_dna[2]);
                 break;
         }
 
         switch (envi)
         {
             case Environment.Hot:
-                EnviBoost += Formula.FieldNameToValue_Zombie("EnviBoost_1");
+                EnviBoost += Formula.FieldNameToValue("EnviBoost_1", DataManager.DNAUp_Zombie, GameManager.user.DB_u_dna[2]);
                 break;
             case Environment.Cold:
-                EnviBoost += Formula.FieldNameToValue_Zombie("EnviBoost_2");
+                EnviBoost += Formula.FieldNameToValue("EnviBoost_2", DataManager.DNAUp_Zombie, GameManager.user.DB_u_dna[2]);
                 break;
             case Environment.Balance:
-                EnviBoost += Formula.FieldNameToValue_Zombie("EnviBoost_3");
+                EnviBoost += Formula.FieldNameToValue("EnviBoost_3", DataManager.DNAUp_Zombie, GameManager.user.DB_u_dna[2]);
                 break;
         }
 
-        MaxHP = (int)(MaxHP / (1.0f + ClimateBoost + EnviBoost));
-        Atk_P = (int)(Atk_P / (1.0f + ClimateBoost + EnviBoost));
-        Atk_M = (int)(Atk_M / (1.0f + ClimateBoost + EnviBoost));
-        Def_P = (int)(Def_P / (1.0f + ClimateBoost + EnviBoost));
-        Def_M = (int)(Def_M / (1.0f + ClimateBoost + EnviBoost));
-        Speed = (int)(Speed / (1.0f + ClimateBoost + EnviBoost));
-        HPDecay = (int)(HPDecay / (1.0f + ClimateBoost + EnviBoost));
-        DrainLife = (int)(DrainLife / (1.0f + ClimateBoost + EnviBoost));
+        MaxHP = MaxHP * 1000 / (1000 + ClimateBoost + EnviBoost);
+        Atk_P = Atk_P * 1000 / (1000 + ClimateBoost + EnviBoost);
+        Atk_M = Atk_M * 1000 / (1000 + ClimateBoost + EnviBoost);
+        Def_P = Def_P * 1000 / (1000 + ClimateBoost + EnviBoost);
+        Def_M = Def_M * 1000 / (1000 + ClimateBoost + EnviBoost);
+        Speed = Speed * 1000 / (1000 + ClimateBoost + EnviBoost);
+        HPDecay = HPDecay * 1000 / (1000 + ClimateBoost + EnviBoost);
+        DrainLife = DrainLife * 1000 / (1000 + ClimateBoost + EnviBoost);
 
         //没有Mission值
 
         HP = MaxHP;
 
         //预制体初始化
-        //Image.spriteName = zombie.Res;
-        Image.spriteName = "Emoticon - Laugh";
+        Image.spriteName = zombie.Res;
+        //Image.spriteName = "Emoticon - Laugh";
         LabelName.text = LocalizationEx.LoadLanguageTextName(zombie.Name);
         HPBar.GetComponent<UISlider>().value = (float)(HP * 1.0f / MaxHP);
         ClimIcon.spriteName = Formula.ClimateIcon(ref ClimIcon, Clim);

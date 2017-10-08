@@ -6,93 +6,29 @@ using System;
 public class Formula {
     //属性计算
     //DNAUP属性计算
-    public static float FieldNameToValue_Human(string fieldName)
+    public static int FieldNameToValue(string fieldName, List<DNAUp_Sheet> dnaSheet, List<U_DNA> useData)
     {
-        float baseVal_1 = 0;
-        float lvVal_1 = 0;
-        float baseVal_2 = 0;
-        float lvVal_2 = 0;
-        float baseVal_3 = 0;
-        float lvVal_3 = 0;
-        float sum = 0;
+        int baseVal_1 = 0;
+        int lvVal_1 = 0;
+        int baseVal_2 = 0;
+        int lvVal_2 = 0;
+        int baseVal_3 = 0;
+        int lvVal_3 = 0;
+        int sum = 0;
 
-        foreach(DNAUp_Sheet sheetData in DataManager.DNAUp_Human)
+        foreach (DNAUp_Sheet sheetData in dnaSheet)
         {
             if (fieldName == sheetData.Type)
             {
                 int id = int.Parse(sheetData.ID);
-                int lv = GameManager.user.DB_u_dh[id - 1].Lv;
+                int lv = useData[id - 1].Lv;
 
-                baseVal_1 = float.Parse(sheetData.Value1);
-                lvVal_1 = float.Parse(sheetData.Value1_Add);
-                baseVal_2 = float.Parse(sheetData.Value2);
-                lvVal_2 = float.Parse(sheetData.Value2_Add);
-                baseVal_3 = float.Parse(sheetData.Value3);
-                lvVal_3 = float.Parse(sheetData.Value3_Add);
-
-                //临时公式
-                sum += baseVal_1 + lvVal_1 * lv + baseVal_2 + lvVal_2 * lv + baseVal_3 + lvVal_3 * lv;
-            }
-        }
-
-        return sum;
-    }
-
-    public static float FieldNameToValue_Virus(string fieldName)
-    {
-        float baseVal_1 = 0;
-        float lvVal_1 = 0;
-        float baseVal_2 = 0;
-        float lvVal_2 = 0;
-        float baseVal_3 = 0;
-        float lvVal_3 = 0;
-        float sum = 0;
-
-        foreach (DNAUp_Sheet sheetData in DataManager.DNAUp_Virus)
-        {
-            if (fieldName == sheetData.Type)
-            {
-                int id = int.Parse(sheetData.ID);
-                int lv = GameManager.user.DB_u_dv[id - 1].Lv;
-
-                baseVal_1 = float.Parse(sheetData.Value1);
-                lvVal_1 = float.Parse(sheetData.Value1_Add);
-                baseVal_2 = float.Parse(sheetData.Value2);
-                lvVal_2 = float.Parse(sheetData.Value2_Add);
-                baseVal_3 = float.Parse(sheetData.Value3);
-                lvVal_3 = float.Parse(sheetData.Value3_Add);
-
-                //临时公式
-                sum += baseVal_1 + lvVal_1 * lv + baseVal_2 + lvVal_2 * lv + baseVal_3 + lvVal_3 * lv;
-            }
-        }
-
-        return sum;
-    }
-
-    public static float FieldNameToValue_Zombie(string fieldName)
-    {
-        float baseVal_1 = 0;
-        float lvVal_1 = 0;
-        float baseVal_2 = 0;
-        float lvVal_2 = 0;
-        float baseVal_3 = 0;
-        float lvVal_3 = 0;
-        float sum = 0;
-
-        foreach (DNAUp_Sheet sheetData in DataManager.DNAUp_Zombie)
-        {
-            if (fieldName == sheetData.Type)
-            {
-                int id = int.Parse(sheetData.ID);
-                int lv = GameManager.user.DB_u_dz[id - 1].Lv;
-
-                baseVal_1 = float.Parse(sheetData.Value1);
-                lvVal_1 = float.Parse(sheetData.Value1_Add);
-                baseVal_2 = float.Parse(sheetData.Value2);
-                lvVal_2 = float.Parse(sheetData.Value2_Add);
-                baseVal_3 = float.Parse(sheetData.Value3);
-                lvVal_3 = float.Parse(sheetData.Value3_Add);
+                baseVal_1 = int.Parse(sheetData.Value1);
+                lvVal_1 = int.Parse(sheetData.Value1_Add);
+                baseVal_2 = int.Parse(sheetData.Value2);
+                lvVal_2 = int.Parse(sheetData.Value2_Add);
+                baseVal_3 = int.Parse(sheetData.Value3);
+                lvVal_3 = int.Parse(sheetData.Value3_Add);
 
                 //临时公式
                 sum += baseVal_1 + lvVal_1 * lv + baseVal_2 + lvVal_2 * lv + baseVal_3 + lvVal_3 * lv;
@@ -104,22 +40,14 @@ public class Formula {
 
     public static string ClimateIcon(ref UISprite sprite,Climate clim)
     {
-        //temporary code,should access resource
-        //UIAtlas atlas;
         switch (clim)
         {
             case Climate.Dry:
-                //atlas = Resources.Load<UIAtlas>("");
-                //sprite.atlas = atlas;
-                return "Button B";
+                return "icon_longzhu_1";
             case Climate.Wet:
-                //atlas = Resources.Load<UIAtlas>("");
-                //sprite.atlas = atlas;
-                return "Button A";
+                return "icon_longzhu_2";
             case Climate.Normal:
-                //atlas = Resources.Load<UIAtlas>("");
-                //sprite.atlas = atlas;
-                return "Button X";
+                return "icon_longzhu_3";
             default:
                 return "";
         }
@@ -127,16 +55,14 @@ public class Formula {
 
     public static string EnviIcon(ref UISprite sprite, Environment envi)
     {
-        //temporary code,should access resource
-        //UIAtlas atlas;
         switch (envi)
         {
             case Environment.Hot:
-                return "Button B";
+                return "icon_gem_10";
             case Environment.Cold:
-                return "Button A";
+                return "icon_gem_20";
             case Environment.Balance:
-                return "Button X";
+                return "icon_gem_30";
             default:
                 return "";
         }
@@ -354,7 +280,7 @@ public class Formula {
     static void InGameEvent(InGameEvent_Sheet ige)
     {
         Battle_C bc = GameObject.Find(GameManager.BATTLE).GetComponent<Battle_C>();
-        float fieldValue = 0;
+        int fieldValue = 0;
         Type t;
         Type tf;
 
@@ -367,10 +293,10 @@ public class Formula {
 
                 //根据属性名，得到该属性现在的值
                 t = typeof(Virus);
-                fieldValue = (float)(t.GetField(ige.FieldName).GetValue(bc.CurVirus));
-                Debug.Log("propertyValue = " + fieldValue);
+                fieldValue = (int)(t.GetField(ige.FieldName).GetValue(bc.CurVirus));
+                Debug.Log("fieldValue = " + fieldValue);
                 //对这个值进行修改
-                bc.CurVirus.GetType().GetField(ige.FieldName).SetValue(bc.CurVirus, fieldValue * (1.0f + float.Parse(ige.Value)));
+                bc.CurVirus.GetType().GetField(ige.FieldName).SetValue(bc.CurVirus, fieldValue * (1000 + int.Parse(ige.Value)) / 1000);
                 break;
             //人类处理
             case "2":
@@ -385,8 +311,8 @@ public class Formula {
                 {
                     foreach (GameObject h in bc.HumanArray)
                     {
-                        fieldValue = Convert.ToSingle(t.GetField(ige.FieldName).GetValue(h.GetComponent<Human>()));
-                        t.GetField(ige.FieldName).SetValue(h.GetComponent<Human>(), Convert.ChangeType(fieldValue * (1.0f + float.Parse(ige.Value)), tf));
+                        fieldValue = Convert.ToInt32(t.GetField(ige.FieldName).GetValue(h.GetComponent<Human>()));
+                        t.GetField(ige.FieldName).SetValue(h.GetComponent<Human>(), Convert.ChangeType(fieldValue * (1000 + int.Parse(ige.Value)) / 1000, tf));
                     }
                 }
                 //非0时作用于该ID的人类
@@ -396,8 +322,8 @@ public class Formula {
                     {
                         if (h.GetComponent<Human>().HumanID.ToString() == ige.TypeParam)
                         {
-                            fieldValue = Convert.ToSingle(t.GetField(ige.FieldName).GetValue(h.GetComponent<Human>()));
-                            t.GetField(ige.FieldName).SetValue(h.GetComponent<Human>(), Convert.ChangeType(fieldValue * (1.0f + float.Parse(ige.Value)), tf));
+                            fieldValue = Convert.ToInt32(t.GetField(ige.FieldName).GetValue(h.GetComponent<Human>()));
+                            t.GetField(ige.FieldName).SetValue(h.GetComponent<Human>(), Convert.ChangeType(fieldValue * (1000 + int.Parse(ige.Value)) / 1000, tf));
                             break;
                         }
                     }
@@ -415,8 +341,8 @@ public class Formula {
                 {
                     foreach (GameObject z in bc.ZombieArray)
                     {
-                        fieldValue = Convert.ToSingle(t.GetField(ige.FieldName).GetValue(z.GetComponent<Zombie>()));
-                        t.GetField(ige.FieldName).SetValue(z.GetComponent<Zombie>(), Convert.ChangeType(fieldValue * (1.0f + float.Parse(ige.Value)), tf));
+                        fieldValue = Convert.ToInt32(t.GetField(ige.FieldName).GetValue(z.GetComponent<Zombie>()));
+                        t.GetField(ige.FieldName).SetValue(z.GetComponent<Zombie>(), Convert.ChangeType(fieldValue * (1000 + int.Parse(ige.Value)) / 1000, tf));
                     }
                 }
                 //非0时作用于该ID的人类
@@ -426,8 +352,8 @@ public class Formula {
                     {
                         if (z.GetComponent<Zombie>().ZombieID.ToString() == ige.TypeParam)
                         {
-                            fieldValue = Convert.ToSingle(t.GetField(ige.FieldName).GetValue(z.GetComponent<Zombie>()));
-                            t.GetField(ige.FieldName).SetValue(z.GetComponent<Zombie>(), Convert.ChangeType(fieldValue * (1.0f + float.Parse(ige.Value)), tf));
+                            fieldValue = Convert.ToInt32(t.GetField(ige.FieldName).GetValue(z.GetComponent<Zombie>()));
+                            t.GetField(ige.FieldName).SetValue(z.GetComponent<Zombie>(), Convert.ChangeType(fieldValue * (1000 + int.Parse(ige.Value)) / 1000, tf));
                             break;
                         }
                     }

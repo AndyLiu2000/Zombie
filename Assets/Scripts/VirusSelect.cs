@@ -3,22 +3,24 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class VirusSelect : MonoBehaviour {
-
-    private GameObject uiGrid;
     public GameObject prefabs_Cell;
-    GameObject BackBtn;
+    public GameObject VirusSelectGrid;
+    public GameObject VirusSelectBackBtn;
     public int UnlockedMissionNum;
+
+    ObjectPool<GameObject, Virus_Sheet> OP;
+    
     UILabel LabelUnlockedMissionNum;
 
     // Use this for initialization
     void Start () {
-        uiGrid = GameObject.Find("VirusSelectGrid");
+        VirusSelectBackBtn = GameObject.Find("VirusSelectBackBtn");
 
-        BackBtn = GameObject.Find("VirusSelectBackBtn");
-
-        UIEventListener.Get(BackBtn).onClick = VirusSelectBackBtn_Click;
+        UIEventListener.Get(VirusSelectBackBtn).onClick = VirusSelectBackBtn_Click;
 
         LabelUnlockedMissionNum = GameObject.Find("UnlockedMissionNum").GetComponent<UILabel>();
+
+        OP = new ObjectPool<GameObject, Virus_Sheet>(10, ResetVirusData, InitVirusData);
     }
 
     public void Enter()
@@ -44,81 +46,11 @@ public class VirusSelect : MonoBehaviour {
 
         LabelUnlockedMissionNum.text = completeMissionNum.ToString();
 
-        //Use object pool to restore objects here, modify later
-        //先清除数据
-        Transform[] children = uiGrid.GetComponentsInChildren<Transform>();
-
-        //若不大于1，说明此时刚刚初始化
-        if (children.Length > 1)
-        {
-            //从1开始，不要删除DNAGrid物体本身
-            for (int i = 1; i < children.Length; i++)
-            {
-                Destroy(children[i].gameObject);
-            }
-        }
-
-        //已解锁的病毒添加数据
-        for (int i = 0; i < GameManager.user.DB_u_UnlockedViruses.Count; i++)
-        {
-            //设定每个cell的相对位置
-            Vector3 pos = new Vector3(0, -uiGrid.GetComponent<UIGrid>().cellHeight * i, 0);
-
-            prefabs_Cell.transform.localPosition = pos;
-
-            //添加配置数据，显示配置数据
-            foreach (Virus_Sheet vs in DataManager.Model_Virus)
-            {
-                if (vs.VirusID == GameManager.user.DB_u_UnlockedViruses[i])
-                {
-                    prefabs_Cell.GetComponent<VirusSelectCell>().LabelVirusName.text = LocalizationEx.LoadLanguageTextName(vs.Name);
-                    prefabs_Cell.GetComponent<VirusSelectCell>().LabelVirusDes.text = LocalizationEx.LoadLanguageTextName(vs.Des);
-
-                    //传递Cell数据
-                    prefabs_Cell.GetComponent<VirusSelectCell>().CellID = int.Parse(vs.VirusID);
-
-                    prefabs_Cell.GetComponent<VirusSelectCell>().LabelMissionIndex.text = string.Format("{0} {1}", LocalizationEx.LoadLanguageTextName("Mission"), Formula.FarthestMission(prefabs_Cell.GetComponent<VirusSelectCell>().CellID));
-
-                    //解锁的按钮可以点击
-                    Formula.ChangeButtonEnable(prefabs_Cell);
-
-                    NGUITools.AddChild(uiGrid, prefabs_Cell);
-
-                }
-            }
-
-        }
-
-        //未解锁的病毒显示解锁条件 show unlock requests of locked virus
+        //Use object pool to restore objects here
+        OP.ObjectSheet = DataManager.Model_Virus;
         for (int i = 1; i < DataManager.Model_Virus.Count; i++)
         {
-            //已解锁列表中不包含的即为未解锁
-            if (!GameManager.user.DB_u_UnlockedViruses.Contains(DataManager.Model_Virus[i].VirusID))
-            {
-                Virus_Sheet vs = DataManager.Model_Virus[i];
-                //设定每个cell的相对位置
-                Vector3 pos = new Vector3(0, -uiGrid.GetComponent<UIGrid>().cellHeight * i, 0);
-
-                prefabs_Cell.transform.localPosition = pos;
-
-                prefabs_Cell.GetComponent<VirusSelectCell>().LabelVirusName.text = LocalizationEx.LoadLanguageTextName(vs.Name);
-                prefabs_Cell.GetComponent<VirusSelectCell>().LabelVirusDes.text = LocalizationEx.LoadLanguageTextName(vs.Des);
-
-                //传递Cell数据
-                prefabs_Cell.GetComponent<VirusSelectCell>().CellID = int.Parse(vs.VirusID);
-
-                int unlockNum = int.Parse(vs.UnlockNum) - completeMissionNum;
-
-                prefabs_Cell.GetComponent<VirusSelectCell>().LabelMissionIndex.text = string.Format("{0} {1} {2}", LocalizationEx.LoadLanguageTextName("Need"), unlockNum, LocalizationEx.LoadLanguageTextName("Stars _To_Unlock"));
-
-                //未解锁的按钮不可点击
-                Formula.ChangeButtonDisable(prefabs_Cell);
-
-                //添加为子物体
-                NGUITools.AddChild(uiGrid, prefabs_Cell);
-
-            }
-
+            OP.New(prefabs_Cell, i, completeMissionNum);
         }
 
         //预制体会保留为最后一次操作他的状态，所以这里要重置一下预制体的状态，以便下次使用时状态不要太奇怪
@@ -126,10 +58,50 @@ public class VirusSelect : MonoBehaviour {
         Formula.ChangeButtonEnable(prefabs_Cell);
 
         //重排位置
-        uiGrid.GetComponent<UIGrid>().Reposition();
-        uiGrid.GetComponent<UIGrid>().repositionNow = true;
-        NGUITools.SetDirty(uiGrid);
+        VirusSelectGrid.GetComponent<UIGrid>().Reposition();
+        VirusSelectGrid.GetComponent<UIGrid>().repositionNow = true;
+        NGUITools.SetDirty(VirusSelectGrid);
+        OP.ResetAll();
+    }
 
+    void ResetVirusData(GameObject GO, List<Virus_Sheet> sheet, int i1, int i2)
+    {
+        GO.GetComponent<VirusSelectCell>().LabelVirusName.text = LocalizationEx.LoadLanguageTextName(sheet[i1].Name);
+        GO.GetComponent<VirusSelectCell>().LabelVirusDes.text = LocalizationEx.LoadLanguageTextName(sheet[i1].Des);
+
+        //传递Cell数据
+        GO.GetComponent<VirusSelectCell>().CellID = int.Parse(sheet[i1].VirusID);
+
+        //未解锁的关卡
+        if (!GameManager.user.DB_u_UnlockedViruses.Contains(sheet[i1].VirusID))
+        {
+            int unlockNum = int.Parse(sheet[i1].UnlockNum) - i2;
+
+            GO.GetComponent<VirusSelectCell>().LabelMissionIndex.text = string.Format("{0} {1} {2}", LocalizationEx.LoadLanguageTextName("Need"), unlockNum, LocalizationEx.LoadLanguageTextName("Stars _To_Unlock"));
+
+            //未解锁的按钮不可点击
+            Formula.ChangeButtonDisable(GO);
+        }
+        else
+        {
+            //已解锁的关卡
+            GO.GetComponent<VirusSelectCell>().LabelMissionIndex.text = string.Format("{0} {1}", LocalizationEx.LoadLanguageTextName("Mission"), Formula.FarthestMission(GO.GetComponent<VirusSelectCell>().CellID));
+
+            //解锁的按钮可以点击
+            Formula.ChangeButtonEnable(GO);
+        }
+    }
+
+    void InitVirusData(GameObject GO, List<Virus_Sheet> sheet, int i1, int i2)
+    {
+        //设定每个cell的相对位置
+        Vector3 pos = new Vector3(0, -VirusSelectGrid.GetComponent<UIGrid>().cellHeight * i1, 0);
+        prefabs_Cell.transform.localPosition = pos;
+
+        ResetVirusData(GO, sheet, i1, i2);
+
+        //添加为子物体
+        OP.ObjectList.Add(NGUITools.AddChild(VirusSelectGrid, prefabs_Cell));
     }
 
     public void VirusSelectBackBtn_Click(GameObject button)

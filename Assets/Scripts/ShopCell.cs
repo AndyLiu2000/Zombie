@@ -6,17 +6,14 @@ public class ShopCell : MonoBehaviour {
 
     public UILabel LabelIAPName;
     public UILabel LabelIAPPrice;
-
-    public GameObject self_Cell;
-    private ShopCell cell;
+    ShopCell cell;
 
     //数据相关
     public int CellID;
 
     public void Cell_Click()
     {
-        cell = self_Cell.GetComponent<ShopCell>();
-        Debug.Log("CellID = " + cell.CellID);
+        cell = gameObject.GetComponent<ShopCell>();
 
         //扣款检查
 
@@ -26,6 +23,7 @@ public class ShopCell : MonoBehaviour {
             if(iap.LootID == cell.CellID.ToString())
             {
                 Formula.Loot(iap.LootID);
+                break;
             }
         }
         

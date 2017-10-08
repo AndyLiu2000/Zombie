@@ -1,20 +1,28 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
 public class Campaign_C : MonoBehaviour {
 
-    private GameObject uiGrid;
+    public GameObject CampainScroll;
     public GameObject prefabs_Cell;
+    public GameObject Campaign_BackBtn;
+    public GameObject CampainGrid;
+
     public int VirusID;
-    GameObject Campaign_BackBtn;
+
+    ObjectPool<GameObject, Mission_Sheet> OP;
+    
+
+    int prefabscellChildrenNum = 0;
 
     // Use this for initialization
     void Start () {
-        uiGrid = GameObject.Find("CampaignGrid");
-
-        Campaign_BackBtn = GameObject.Find("Campaign_BackBtn");
         UIEventListener.Get(Campaign_BackBtn).onClick = Campaign_BackBtn_Click;
+
+        OP = new ObjectPool<GameObject, Mission_Sheet>(10, ResetMissionData, InitMissioinData);
+        prefabscellChildrenNum = prefabs_Cell.GetComponentsInChildren<Transform>().Length;
     }
 
     public void Enter(int curVirusID)
@@ -27,21 +35,12 @@ public class Campaign_C : MonoBehaviour {
     {
         //创建数据 init mission data
         Debug.Log("Init Mission-data");
-        //Use object pool to restore objects here, modify later
-        //先清除数据 clear data first
-        Transform[] children = uiGrid.GetComponentsInChildren<Transform>();
-
-        //若不大于1，说明此时刚刚初始化
-        if (children.Length > 1)
-        {
-            //从1开始，不要删除DNAGrid物体本身
-            for (int i = 1; i < children.Length; i++)
-            {
-                Destroy(children[i].gameObject);
-            }
-        }
+        //Use object pool to restore objects here
 
         //添加数据 set data
+        OP.ObjectSheet = DataManager.Mission_Parameter;
+        int missionNum = 0;
+
         for (int i = DataManager.Mission_Parameter.Count - 1; i > 0; i--)
         {
             foreach (U_MissionFlag missionData in GameManager.user.DB_u_mf)
@@ -51,69 +50,90 @@ public class Campaign_C : MonoBehaviour {
                     //已通关的关卡显示出来 show completed missioins
                     if (missionData.Flag)
                     {
-                        //设定每个cell的相对位置 set position of every cell
-                        Vector3 pos = new Vector3(0, -uiGrid.GetComponent<UIGrid>().cellHeight * i, 0);
-                        prefabs_Cell.transform.localPosition = pos;
-
-                        //添加配置数据，显示配置数据 show data
-                        prefabs_Cell.GetComponent<CampaignCell>().LabelMissionName.text = LocalizationEx.LoadLanguageTextName(DataManager.Mission_Parameter[i].MissionID);
-
-                        //传递Cell数据 transfer cell data
-                        prefabs_Cell.GetComponent<CampaignCell>().CellID = int.Parse(DataManager.Mission_Parameter[i].MissionID);
-
-                        //添加用户数据，显示用户数据 set and show user data
-                        foreach (U_MissionFlag md in GameManager.user.DB_u_mf)
-                        {
-                            if (md.MissionID.ToString() == DataManager.Mission_Parameter[i].MissionID)
-                            {
-                                prefabs_Cell.GetComponent<CampaignCell>().LabelMissionFlag.text = "Complete!";
-                            }
-                        }
-
-                        //添加为子物体
-                        NGUITools.AddChild(uiGrid, prefabs_Cell);
-
-                        //重排位置
-                        uiGrid.GetComponent<UIGrid>().Reposition();
-                        uiGrid.GetComponent<UIGrid>().repositionNow = true;
-                        NGUITools.SetDirty(uiGrid);
+                        OP.New(prefabs_Cell, i,1);
+                        missionNum++;
                     }
                     else
                     {
                         //刚开启的关卡显示出来
                         if (Formula.FarthestMission(missionData.VirusID) == i)
                         {
-                            //设定每个cell的相对位置
-                            Vector3 pos = new Vector3(0, -uiGrid.GetComponent<UIGrid>().cellHeight * i, 0);
-                            prefabs_Cell.transform.localPosition = pos;
-
-                            //添加配置数据，显示配置数据
-                            prefabs_Cell.GetComponent<CampaignCell>().LabelMissionName.text = LocalizationEx.LoadLanguageTextName(DataManager.Mission_Parameter[i].MissionID);
-
-                            //传递Cell数据
-                            prefabs_Cell.GetComponent<CampaignCell>().CellID = int.Parse(DataManager.Mission_Parameter[i].MissionID);
-
-                            //添加用户数据，显示用户数据
-                            foreach (U_MissionFlag md in GameManager.user.DB_u_mf)
-                            {
-                                if (md.MissionID.ToString() == DataManager.Mission_Parameter[i].MissionID)
-                                {
-                                    prefabs_Cell.GetComponent<CampaignCell>().LabelMissionFlag.text = "New!";
-                                }
-                            }
-
-                            //添加为子物体
-                            NGUITools.AddChild(uiGrid, prefabs_Cell);
-
-                            //重排位置
-                            uiGrid.GetComponent<UIGrid>().Reposition();
-                            uiGrid.GetComponent<UIGrid>().repositionNow = true;
-                            NGUITools.SetDirty(uiGrid);
+                            OP.New(prefabs_Cell, i,2);
+                            missionNum++;
                         }
-                    }  
+                    }
                 }
             }
         }
+
+        DeleteUnusedCell(CampainScroll,missionNum);
+    }
+
+    void DeleteUnusedCell(GameObject go,int groupNum)
+    {
+        Transform[] children = CampainGrid.GetComponentsInChildren<Transform>();
+
+        //多余的关卡先删掉
+        if (children.Length > groupNum * prefabscellChildrenNum + 1)
+        {
+            //从1开始，不要删除DNAGrid物体本身
+            for (int i = groupNum * prefabscellChildrenNum; i < children.Length; i++)
+            {
+                OP.ObjectList.Remove(children[i].gameObject);
+                Destroy(children[i].gameObject);
+            }
+            go.GetComponent<UIScrollView>().ResetPosition();
+        }
+
+        //重排位置
+        CampainGrid.GetComponent<UIGrid>().Reposition();
+        CampainGrid.GetComponent<UIGrid>().repositionNow = true;
+        NGUITools.SetDirty(CampainGrid);
+
+        OP.ResetAll();
+    }
+
+    void ResetMissionData(GameObject GO, List<Mission_Sheet> sheet, int i1,int i2)
+    {
+        //添加配置数据，显示配置数据
+        GO.GetComponent<CampaignCell>().LabelMissionName.text = LocalizationEx.LoadLanguageTextName(sheet[i1].MissionID);
+
+        //传递Cell数据
+        GO.GetComponent<CampaignCell>().CellID = int.Parse(sheet[i1].MissionID);
+
+        //添加用户数据，显示用户数据
+        foreach (U_MissionFlag md in GameManager.user.DB_u_mf)
+        {
+            if (md.MissionID.ToString() == sheet[i1].MissionID)
+            {
+                if (i2 == 1)
+                {
+                    GO.GetComponent<CampaignCell>().LabelMissionFlag.text = "Complete!";
+                }
+                else if (i2 == 2)
+                {
+                    GO.GetComponent<CampaignCell>().LabelMissionFlag.text = "New!";
+                }
+                break;
+            }
+        }
+    }
+
+    void InitMissioinData(GameObject GO, List<Mission_Sheet> sheet, int i1,int i2)
+    {
+        //设定每个cell的相对位置
+        Vector3 pos = new Vector3(0, -CampainGrid.GetComponent<UIGrid>().cellHeight * i1, 0);
+        GO.transform.localPosition = pos;
+
+        ResetMissionData(GO, sheet, i1, i2);
+
+        //添加为子物体
+        OP.ObjectList.Add(NGUITools.AddChild(CampainGrid, GO));
+
+        //重排位置
+        CampainGrid.GetComponent<UIGrid>().Reposition();
+        CampainGrid.GetComponent<UIGrid>().repositionNow = true;
+        NGUITools.SetDirty(CampainGrid);
     }
 
     public void Campaign_BackBtn_Click(GameObject b)
