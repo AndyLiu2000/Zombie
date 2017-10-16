@@ -6,25 +6,30 @@ using UnityEngine;
 public class Human : MonoBehaviour{
 
     const int KILL_HUMAN_SP = 5;
-    const int INFECT_HUMAN_SP = 4;
+    public const int INFECT_HUMAN_SP = 4;
     const float INFECT_BTN_DISAPPEAR = 1.0f;
     const int INFECTION_THRESHOLD = 30; //传染的感染度临界值
     const float INFECT_INTERVAL = 5.0f;
+    const float ATTACK_INTERVAL = 5.0f;
 
     //Model：Human
     public int HumanID;
     public int MaxHP;
     public int MaxInfection;
-    public int Atk_P;
-    public int Atk_M;
-    public int Def_P;
-    public int Def_M;
+    public int Atk;
+    public int Heal;
+    public int Def;
+    public int Cure;
     public int InfectShield;
     public int InfectionAnti;
     public int CommunicationAnti;
     public int HPHealing;
     public string Name;
     public string Res;
+    public string SkillID;
+
+    //次级属性
+    public int param;
 
     //战斗变量
     public int HP;
@@ -45,18 +50,22 @@ public class Human : MonoBehaviour{
     public GameObject InfectionBar;
     public UISprite ClimIcon;
     public UISprite EnviIcon;
-    public UISprite AbilityIcon;
+    public UISprite SkillIcon;
     public GameObject StartBubble;
+    IEnumerator DestroySEParam;
 
     //环境变量
     Battle_C Battle;
     float oneSecondDeltaTime = 0;
-    float fiveSecondDeltaTime = 0;
+    float skillDeltaTime = 0;
+    float infectDeltaTime = 0;
     Human self;
+    
 
     private void Awake()
     {
         Battle = GameObject.Find(GameManager.BATTLE).GetComponent<Battle_C>();
+        //GetParam();
     }
 
     private void Start()
@@ -77,7 +86,8 @@ public class Human : MonoBehaviour{
         if (Battle.BattleState == BattleState.Game)
         {
             oneSecondDeltaTime += Time.fixedDeltaTime;
-            fiveSecondDeltaTime += Time.fixedDeltaTime;
+            infectDeltaTime += Time.fixedDeltaTime;
+            skillDeltaTime += Time.fixedDeltaTime;
 
             //回血 restore
             if (self.HP < self.MaxHP)
@@ -92,7 +102,7 @@ public class Human : MonoBehaviour{
             if (self.HP <= 0)
             {
                 Battle.ZombieKillNum += 1;
-                GenerateZombie();
+                HumanDie();
             }
 
             //解药相关 medicine
@@ -112,9 +122,9 @@ public class Human : MonoBehaviour{
                     InfectionBar.GetComponent<UISlider>().value = (float)(Infection * 1.0f / MaxInfection);
 
                     //解药研发 research
-                    if (Infection  * 5 >= MaxInfection)
+                    if (Infection  * Battle.CurVirus.Medi_Start / 1000 >= MaxInfection)
                     {
-                        Battle.Medicine += 10.0f;
+                        Battle.Medicine += Battle.MEDICINESPD * Battle.CurVirus.Medi_Spd / 1000;
                     }
                 }
 
@@ -123,7 +133,7 @@ public class Human : MonoBehaviour{
                 {
                     Battle.InfectKillNum += 1;
 
-                    GenerateZombie();
+                    HumanDie();
 
                     //后面的代码全部不再执行
                     //return;
@@ -133,7 +143,7 @@ public class Human : MonoBehaviour{
                 if (MaxInfection <= INFECTION_THRESHOLD * Infection)
                 {
                     //Battle.CurVirus.CommunicateRate用在这里，缩短传染的时间间隔
-                    if (fiveSecondDeltaTime >= INFECT_INTERVAL * 1000 / (1000 + Battle.CurVirus.CommunicateRate))
+                    if (infectDeltaTime >= INFECT_INTERVAL * 1000 / (1000 + Battle.CurVirus.CommunicateRate))
                     {
                         List<GameObject> unInfectedHumans = new List<GameObject>();
                         foreach (GameObject h in Battle.HumanArray)
@@ -144,19 +154,6 @@ public class Human : MonoBehaviour{
                                 unInfectedHumans.Add(h);
                             }
                         }
-
-                        /*
-                        //感染的规则要重写
-                        float distance = Mathf.Sqrt(Mathf.Pow(SelfModel.transform.localPosition.x - h.transform.localPosition.x, 2.0f) + Mathf.Pow(SelfModel.transform.localPosition.y - h.transform.localPosition.y, 2.0f));
-                        float rate = Battle.CurVirus.CommunicateRate * distance / Screen.width;
-                        float random = UnityEngine.Random.Range(0.0f, 1.0f);
-                        if (rate < random)
-                        {
-                            h.GetComponent<Human>().Infected = true;
-                            Debug.Log("感染一个新人类");
-                            Battle.SP_Add(INFECT_HUMAN_SP, Battle.StrategyBtn, Battle.LabelStrategy, false);
-                            break;
-                        }*/
                         
                         if (unInfectedHumans.Count > 0)
                         {
@@ -179,13 +176,35 @@ public class Human : MonoBehaviour{
                 
             }
 
-            //每5秒攻击一次 attack every 5 seconds
-            if (fiveSecondDeltaTime >= 100)
+            //每5秒使用一次技能 cast skill every 5 seconds
+            if (skillDeltaTime >= ATTACK_INTERVAL)
             {
-                foreach (GameObject z in Battle.ZombieArray)
+                switch (SkillID)
                 {
-                    z.GetComponent<Zombie>().HP -= (int)(Atk_P * 0.0001);
+                    case "1":   //随机单体攻击
+                        RandomSingleAttack();
+                        break;
+                    case "2":   //治愈自身感染度
+                        CureSelfInfection();
+                        break;
+                    case "3":   //随机单体治疗
+                        RandomSingleHeal();
+                        break;
+                    case "4":   //随机三目标治疗
+                        RandomSingleHeal();
+                        RandomSingleHeal();
+                        RandomSingleHeal();
+                        break;
+                    case "5":   //随机群体治疗生命值和感染度
+                        RandomSingle_HealCure();
+                        break;
                 }
+                
+            }
+
+            if (skillDeltaTime >= ATTACK_INTERVAL)
+            {
+                skillDeltaTime = 0.0f;
             }
 
             //按秒执行操作
@@ -194,21 +213,108 @@ public class Human : MonoBehaviour{
                 oneSecondDeltaTime = 0.0f;
             }
 
-            if (fiveSecondDeltaTime >= INFECT_INTERVAL * 1000 / (1000 + Battle.CurVirus.CommunicateRate))
+            if (infectDeltaTime >= INFECT_INTERVAL * 1000 / (1000 + Battle.CurVirus.CommunicateRate))
             {
-                fiveSecondDeltaTime = 0.0f;
+                infectDeltaTime = 0.0f;
             }
         }
 
         if (Battle.BattleState == BattleState.End)
         {
-
+            
         }
 
     }
 
+    void RandomSingleAttack()
+    {
+        Debug.Log("Human-RandomSingleAttack");
+        if (Battle.ZombieArray.Count > 0)
+        {
+            GameObject zombie = Formula.ArrayListRandomElement(Battle.ZombieArray) as GameObject;
+            Zombie aZombie = zombie.GetComponent<Zombie>();
+
+            Debug.Log("Atk = " + Atk);
+            Debug.Log("param = " + param);
+            Debug.Log("aZombie.Def = " + aZombie.Def);
+            if (Atk * param / 1000 >= aZombie.Def)
+            {
+                aZombie.HP -= (int)(Atk * param / 1000 - aZombie.Def);
+                GenerateSEInGameobjectPosition(zombie, "Skill_Behit_Z", true, null);
+            }
+        }
+    }
+
+    void HumanDie()
+    {
+        GenerateSEInGameobjectPosition(gameObject, "HumanDie", false, "GenerateZombie");
+    }
+
+    void CureSelfInfection()
+    {
+        Debug.Log("Human-CureSelfInfection");
+
+        Infection += Cure * param / 1000;
+        if (Infection <= 0)
+            Infection = 0;
+
+        GenerateSEInGameobjectPosition(gameObject, "Skill_Cure_H", true, null);
+    }
+
+    void GenerateSEInGameobjectPosition(GameObject go, string seName, bool isSelfActive,string invokeName)
+    {
+        Debug.Log("seName = " + seName);
+        GameObject se = NGUITools.AddChild(GameManager.BC.Entity, (GameObject)(Resources.Load("SEPrefabs" + "/" + seName)));
+        se.transform.localScale = new Vector3(80, 80, 1);        //该死的Unity，把动画文件加载的时候默认缩小为1/100了，所以这里要扩大100倍。注意，改Prefabs的缩放比例是没用的
+        NGUITools.SetDirty(GameManager.BC.Entity);
+        Transform desGO = go.GetComponent<Transform>();
+        se.transform.localPosition = desGO.localPosition;
+
+        go.SetActive(isSelfActive);
+        if (invokeName != null)
+            Invoke(invokeName, se.GetComponent<Animator>().runtimeAnimatorController.animationClips[0].length);
+
+        Destroy(se, se.GetComponent<Animator>().runtimeAnimatorController.animationClips[0].length);
+    }
+
+    void RandomSingleHeal()
+    {
+        Debug.Log("Human-RandomSingleHeal");
+        if (GameManager.BC.HumanArray.Count > 0)
+        {
+            GameObject human = Formula.ArrayListRandomElement(Battle.HumanArray) as GameObject;
+            Human aHuman = human.GetComponent<Human>();
+            aHuman.HP += Heal * param / 1000;
+            if (aHuman.HP >= aHuman.MaxHP)
+                aHuman.HP = aHuman.MaxHP;
+
+            GenerateSEInGameobjectPosition(human, "Skill_Heal_H", true, null);
+        }
+    }
+
+    void RandomSingle_HealCure()
+    {
+        Debug.Log("Human-RandomSingle_HealCure");
+        if (GameManager.BC.HumanArray.Count > 0)
+        {
+            GameObject human = Formula.ArrayListRandomElement(GameManager.BC.HumanArray) as GameObject;
+            Human aHuman = human.GetComponent<Human>();
+
+            aHuman.HP += Heal * param / 1000;
+            if (aHuman.HP >= aHuman.MaxHP)
+                aHuman.HP = aHuman.MaxHP;
+
+            aHuman.Infection -= Cure * param / 1000;
+            if (aHuman.Infection <= 0)
+                aHuman.Infection = 0;
+
+            GenerateSEInGameobjectPosition(human, "Skill_HealCure_H", true, null);
+        }
+    }
+
     void GenerateZombie()
     {
+        //GenerateDestroySE();
         //杀死人类获得SP
         Battle.SP_Add(KILL_HUMAN_SP, Battle.StrategyBtn, Battle.LabelStrategy, false);
 
@@ -249,10 +355,10 @@ public class Human : MonoBehaviour{
         //Model值
         MaxHP = int.Parse(human.MaxHP);
         MaxInfection = int.Parse(human.MaxInfection);
-        Atk_P = int.Parse(human.Atk_P);
-        Atk_M = int.Parse(human.Atk_M);
-        Def_P = int.Parse(human.Def_P);
-        Def_M = int.Parse(human.Def_M);
+        Atk = int.Parse(human.Atk);
+        Heal = int.Parse(human.Heal);
+        Def = int.Parse(human.Def);
+        Cure = int.Parse(human.Cure);
         InfectShield = int.Parse(human.InfectShield);
         InfectionAnti = int.Parse(human.InfectionAnti);
         CommunicationAnti = int.Parse(human.CommunicationAnti);
@@ -293,15 +399,17 @@ public class Human : MonoBehaviour{
                 break;
         }
 
+        SkillID = human.SkillID;
+
         //DNA值
         MaxHP = MaxHP * 1000 / (1000 + Formula.FieldNameToValue("MaxHP", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1]));
         MaxInfection = MaxInfection * 1000 / (1000 + Formula.FieldNameToValue("MaxInfection", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1]));
         Debug.Log("MaxInfection 1 = " + MaxInfection);
         Debug.Log("MaxInfection.dna = " + Formula.FieldNameToValue("MaxInfection", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1]));
-        Atk_P = Atk_P * 1000 / (1000 + Formula.FieldNameToValue("Atk_P", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1]));
-        Atk_M = Atk_M * 1000 / (1000 + Formula.FieldNameToValue("Atk_M", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1]));
-        Def_P = Def_P * 1000 / (1000 + Formula.FieldNameToValue("Def_P", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1]));
-        Def_M = Def_M * 1000 / (1000 + Formula.FieldNameToValue("Def_M", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1]));
+        Atk = Atk * 1000 / (1000 + Formula.FieldNameToValue("Atk", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1]));
+        Heal = Heal * 1000 / (1000 + Formula.FieldNameToValue("Heal", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1]));
+        Def = Def * 1000 / (1000 + Formula.FieldNameToValue("Def", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1]));
+        Cure = Cure * 1000 / (1000 + Formula.FieldNameToValue("Cure", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1]));
         InfectShield = InfectShield * 1000 / (1000 + Formula.FieldNameToValue("InfectShield", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1]));
         InfectionAnti = InfectionAnti * 1000 / (1000 + Formula.FieldNameToValue("InfectionAnti", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1]));
         CommunicationAnti = CommunicationAnti * 1000 / (1000 + Formula.FieldNameToValue("CommunicationAnti", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1]));
@@ -349,10 +457,10 @@ public class Human : MonoBehaviour{
 
         MaxHP = MaxHP  * (1000 + int.Parse(mission.MaxHPBoost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
         MaxInfection = MaxInfection * (1000 + int.Parse(mission.InfectionBoost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
-        Atk_P = Atk_P * (1000 + int.Parse(mission.Atk_P_Boost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
-        Atk_M = Atk_M * (1000 + int.Parse(mission.Atk_M_Boost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
-        Def_P = Def_P * (1000 + int.Parse(mission.Def_P_Boost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
-        Def_M = Def_M * (1000 + int.Parse(mission.Def_M_Boost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
+        Atk = Atk * (1000 + int.Parse(mission.Atk_Boost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
+        Heal = Heal * (1000 + int.Parse(mission.Heal_Boost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
+        Def = Def * (1000 + int.Parse(mission.Def_Boost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
+        Cure = Cure * (1000 + int.Parse(mission.Cure_Boost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
         InfectShield = InfectShield * (1000 + int.Parse(mission.Speed_Boost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
         InfectionAnti = InfectionAnti * (1000 + int.Parse(mission.InfectionAntiBoost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
         CommunicationAnti = CommunicationAnti *(1000 + int.Parse(mission.CommunicationAntiBoost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
@@ -369,9 +477,17 @@ public class Human : MonoBehaviour{
         InfectionBar.GetComponent<UISlider>().value = (float)(Infection * 1.0f / MaxInfection);
         ClimIcon.spriteName = Formula.ClimateIcon(ref ClimIcon, Clim);
         EnviIcon.spriteName = Formula.EnviIcon(ref ClimIcon, Envi);
-        AbilityIcon.spriteName = "Button Y";
 
-}
+        foreach (SpecialAbility_Sheet sas in DataManager.SpecialAbility_Ability)
+        {
+            if (sas.ID == SkillID)
+            {
+                SkillIcon.spriteName = sas.ResIcon;
+                param = int.Parse(sas.Value1) + int.Parse(sas.Value1_Add);
+                break;
+            }
+        }
+    }
 
     public Human HumanBattleEvent()
     {
@@ -415,6 +531,9 @@ public class Human : MonoBehaviour{
                     Battle.InfectNum += 1;
                     Battle.VirusNum -= 1;
                     Battle.SP_Add(INFECT_HUMAN_SP, Battle.StrategyBtn, Battle.LabelStrategy, false);
+
+                    button.GetComponent<UIButton>().state = UIButton.State.Disabled;
+                    button.GetComponent<BoxCollider>().enabled = false;
 
                     Destroy(button, INFECT_BTN_DISAPPEAR);
                     Battle.BattleState = BattleState.Game;

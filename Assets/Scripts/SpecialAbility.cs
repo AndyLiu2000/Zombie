@@ -13,7 +13,7 @@ public class SpecialAbility_Sheet
 {
     //标签页内的字段
     public string ID;
-    public string Type;
+    public string ResIcon;
     public string Name;
     public string Value1;
     public string Value1_Add;

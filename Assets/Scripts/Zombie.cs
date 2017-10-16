@@ -4,22 +4,26 @@ using UnityEngine;
 
 public class Zombie : MonoBehaviour{
 
-    private float ATTACK_INTERVAL = 1.0f;
+    private float ATTACK_INTERVAL = 5.0f;
     private float HEALTH_INTERVAL = 1.0f;
 
     //Model：丧尸
     public float ZombieID;
     public int MaxHP;
-    public int Atk_P;
-    public int Atk_M;
-    public int Def_P;
-    public int Def_M;
+    public int Atk;
+    public int Heal;
+    public int Def;
+    public int Infect;
     public int Speed;
     public int HPDecay;
     public int DrainLife;
     public string AbilityID;
     public string Name;
     public string Res;
+    public string SkillID;
+
+    //次级属性
+    public int param;
 
     //战斗变量
     public int HP;
@@ -36,15 +40,19 @@ public class Zombie : MonoBehaviour{
     public GameObject HPBar;
     public UISprite ClimIcon;
     public UISprite EnviIcon;
-    public UISprite AbilityIcon;
+    public UISprite SkillIcon;
+    Battle_C Battle;
 
     //环境变量
     float oneSecondDeltaTime = 0;
-    float fiveSecondDeltaTime = 0;
+    float skillDeltaTime = 0;
+    
 
     private void Start()
     {
         self = gameObject.GetComponent<Zombie>();
+        Battle = GameObject.Find(GameManager.BATTLE).GetComponent<Battle_C>();
+        //GetParam();
     }
 
     private void FixedUpdate()
@@ -57,6 +65,7 @@ public class Zombie : MonoBehaviour{
         if (GameManager.BC.BattleState == BattleState.Game)
         {
             oneSecondDeltaTime += Time.fixedDeltaTime;
+            skillDeltaTime += Time.fixedDeltaTime;
 
             //失血
             if (oneSecondDeltaTime >= HEALTH_INTERVAL)
@@ -71,12 +80,35 @@ public class Zombie : MonoBehaviour{
                 ZombieDie();
             }
 
-            //每1秒攻击一次
-            if (oneSecondDeltaTime >= ATTACK_INTERVAL * 2) // 暂时不攻击 don't attack temporarily
+            //每5秒攻击一次
+            if (skillDeltaTime >= ATTACK_INTERVAL) // 暂时不攻击 don't attack temporarily
             {
-                foreach (GameObject h in GameManager.BC.HumanArray)
+                switch (SkillID)
                 {
-                    h.GetComponent<Human>().HP -= Atk_P * 100000;
+                    case "100":   //随机单体攻击
+                        RandomSingleAttack();
+                        break;
+                    case "200":   //随机群体攻击
+                        RandomSingleAttack();
+                        RandomSingleAttack();
+                        RandomSingleAttack();
+                        break;
+                    case "300":   //随机单体治疗
+                        RandomSingleHeal();
+                        break;
+                    case "400":   //随机三目标治疗
+                        RandomSingleHeal();
+                        RandomSingleHeal();
+                        RandomSingleHeal();
+                        break;
+                    case "500":   //随机单体攻击和增加感染度
+                        RandomSingle_AttackInfect();
+                        break;
+                    case "600":   //随机群体攻击和增加感染度
+                        RandomSingle_AttackInfect();
+                        RandomSingle_AttackInfect();
+                        RandomSingle_AttackInfect();
+                        break;
                 }
             }
 
@@ -86,9 +118,9 @@ public class Zombie : MonoBehaviour{
                 oneSecondDeltaTime = 0.0f;
             }
 
-            if (fiveSecondDeltaTime >= 5.0f)
+            if (skillDeltaTime >= 5.0f)
             {
-                fiveSecondDeltaTime = 0.0f;
+                skillDeltaTime = 0.0f;
             }
         }
 
@@ -99,7 +131,89 @@ public class Zombie : MonoBehaviour{
 
     }
 
+    void RandomSingleAttack()
+    {
+        Debug.Log("Zombie-RandomSingleAttack");
+        if (GameManager.BC.HumanArray.Count > 0)
+        {
+            GameObject human = Formula.ArrayListRandomElement(Battle.HumanArray) as GameObject;
+            Human aHuman = human.GetComponent<Human>();
+            if (Atk * param / 1000 >= aHuman.Def)
+            {
+                aHuman.HP -= (int)(Atk * param / 1000 - aHuman.Def);
+                GenerateSEInGameobjectPosition(human, "Skill_Behit_H", true, null);
+            }
+        }
+    }
+
+    void GenerateDestroySE()
+    {
+        GameObject skillBullet = NGUITools.AddChild(GameManager.BC.Entity, (GameObject)(Resources.Load("SEPrefabs/Skill_Behit_H")));
+        skillBullet.transform.localScale = new Vector3(80, 80, 1);        //该死的Unity，把动画文件加载的时候默认缩小为1/100了，所以这里要扩大100倍。注意，改Prefabs的缩放比例是没用的
+        NGUITools.SetDirty(GameManager.BC.Entity);
+        Transform z = gameObject.GetComponent<Transform>();
+        skillBullet.transform.localPosition = z.localPosition;
+
+        gameObject.SetActive(false);
+        Invoke("ZombieDie", skillBullet.GetComponent<Animator>().runtimeAnimatorController.animationClips[0].length);
+        Destroy(skillBullet, skillBullet.GetComponent<Animator>().runtimeAnimatorController.animationClips[0].length);
+    }
+
+    void GenerateSEInGameobjectPosition(GameObject go, string seName, bool isSelfActive, string invokeName)
+    {
+        GameObject se = NGUITools.AddChild(GameManager.BC.Entity, (GameObject)(Resources.Load("SEPrefabs" + "/" + seName)));
+        se.transform.localScale = new Vector3(80, 80, 1);        //该死的Unity，把动画文件加载的时候默认缩小为1/100了，所以这里要扩大100倍。注意，改Prefabs的缩放比例是没用的
+        NGUITools.SetDirty(GameManager.BC.Entity);
+        Transform desGO = go.GetComponent<Transform>();
+        se.transform.localPosition = desGO.localPosition;
+
+        go.SetActive(isSelfActive);
+        if (invokeName != null)
+            Invoke(invokeName, se.GetComponent<Animator>().runtimeAnimatorController.animationClips[0].length);
+
+        Destroy(se, se.GetComponent<Animator>().runtimeAnimatorController.animationClips[0].length);
+    }
+
+    void RandomSingleHeal()
+    {
+        Debug.Log("Zombie-RandomSingleHeal");
+        if (GameManager.BC.ZombieArray.Count > 0)
+        {
+            GameObject zombie = Formula.ArrayListRandomElement(GameManager.BC.ZombieArray) as GameObject;
+            Zombie aZombie = zombie.GetComponent<Zombie>();
+            aZombie.HP += Heal * param / 1000;
+            if (aZombie.HP >= aZombie.MaxHP)
+                aZombie.HP = aZombie.MaxHP;
+
+            GenerateSEInGameobjectPosition(zombie, "Skill_Heal_Z", true, null);
+        }
+    }
+
+    void RandomSingle_AttackInfect()
+    {
+        Debug.Log("Zombie-RandomSingle_AttackInfect");
+        if (GameManager.BC.HumanArray.Count > 0)
+        {
+            GameObject human = Formula.ArrayListRandomElement(GameManager.BC.HumanArray) as GameObject;
+            Human aHuman = human.GetComponent<Human>();
+
+            if (Atk * param / 1000 >= aHuman.Def)
+                aHuman.HP -= (int)(Atk * param / 1000 - aHuman.Def);
+
+            aHuman.Infection += Infect * param / 1000;
+            if (aHuman.Infection >= aHuman.MaxInfection)
+                aHuman.Infection = aHuman.MaxInfection;
+
+            GenerateSEInGameobjectPosition(human, "Skill_BehitInfect_H", true, null);
+        }
+    }
+
     void ZombieDie()
+    {
+        GenerateSEInGameobjectPosition(gameObject, "ZombieDie", false, "ZombieVanish");
+    }
+
+    void ZombieVanish()
     {
         GameManager.BC.ZombieArray.Remove(gameObject);
         Destroy(gameObject);
@@ -121,10 +235,10 @@ public class Zombie : MonoBehaviour{
 
         //Model值
         MaxHP = int.Parse(zombie.MaxHP);
-        Atk_P = int.Parse(zombie.Atk_P);
-        Atk_M = int.Parse(zombie.Atk_M);
-        Def_P = int.Parse(zombie.Def_P);
-        Def_M = int.Parse(zombie.Def_M);
+        Atk = int.Parse(zombie.Atk);
+        Heal = int.Parse(zombie.Heal);
+        Def = int.Parse(zombie.Def);
+        Infect = int.Parse(zombie.Infect);
         Speed = int.Parse(zombie.Speed);
         HPDecay = int.Parse(zombie.HPDecay);
         DrainLife = int.Parse(zombie.DrainLife);
@@ -156,12 +270,14 @@ public class Zombie : MonoBehaviour{
                 break;
         }
 
+        SkillID = zombie.SkillID;
+
         //DNA值
         MaxHP = MaxHP * (1000 + Formula.FieldNameToValue("MaxHP",DataManager.DNAUp_Zombie, GameManager.user.DB_u_dna[2])) / 1000;
-        Atk_P = Atk_P * (1000 + Formula.FieldNameToValue("Atk_P", DataManager.DNAUp_Zombie, GameManager.user.DB_u_dna[2])) / 1000;
-        Atk_M = Atk_M * (1000 + Formula.FieldNameToValue("Atk_M", DataManager.DNAUp_Zombie, GameManager.user.DB_u_dna[2])) / 1000;
-        Def_P = Def_P * (1000 + Formula.FieldNameToValue("Def_P", DataManager.DNAUp_Zombie, GameManager.user.DB_u_dna[2])) / 1000;
-        Def_M = Def_M * (1000 + Formula.FieldNameToValue("Def_M", DataManager.DNAUp_Zombie, GameManager.user.DB_u_dna[2])) / 1000;
+        Atk = Atk * (1000 + Formula.FieldNameToValue("Atk", DataManager.DNAUp_Zombie, GameManager.user.DB_u_dna[2])) / 1000;
+        Heal = Heal * (1000 + Formula.FieldNameToValue("Heal", DataManager.DNAUp_Zombie, GameManager.user.DB_u_dna[2])) / 1000;
+        Def = Def * (1000 + Formula.FieldNameToValue("Def", DataManager.DNAUp_Zombie, GameManager.user.DB_u_dna[2])) / 1000;
+        Infect = Infect * (1000 + Formula.FieldNameToValue("Infect", DataManager.DNAUp_Zombie, GameManager.user.DB_u_dna[2])) / 1000;
         Speed = Speed * (1000 + Formula.FieldNameToValue("Speed", DataManager.DNAUp_Zombie, GameManager.user.DB_u_dna[2])) / 1000;
         HPDecay = HPDecay * (1000 + Formula.FieldNameToValue("HPDecay", DataManager.DNAUp_Zombie, GameManager.user.DB_u_dna[2])) / 1000;
         DrainLife = DrainLife * (1000 + Formula.FieldNameToValue("DrainLife", DataManager.DNAUp_Zombie, GameManager.user.DB_u_dna[2])) / 1000;
@@ -194,10 +310,10 @@ public class Zombie : MonoBehaviour{
         }
 
         MaxHP = MaxHP * 1000 / (1000 + ClimateBoost + EnviBoost);
-        Atk_P = Atk_P * 1000 / (1000 + ClimateBoost + EnviBoost);
-        Atk_M = Atk_M * 1000 / (1000 + ClimateBoost + EnviBoost);
-        Def_P = Def_P * 1000 / (1000 + ClimateBoost + EnviBoost);
-        Def_M = Def_M * 1000 / (1000 + ClimateBoost + EnviBoost);
+        Atk = Atk * 1000 / (1000 + ClimateBoost + EnviBoost);
+        Heal = Heal * 1000 / (1000 + ClimateBoost + EnviBoost);
+        Def = Def * 1000 / (1000 + ClimateBoost + EnviBoost);
+        Infect = Infect * 1000 / (1000 + ClimateBoost + EnviBoost);
         Speed = Speed * 1000 / (1000 + ClimateBoost + EnviBoost);
         HPDecay = HPDecay * 1000 / (1000 + ClimateBoost + EnviBoost);
         DrainLife = DrainLife * 1000 / (1000 + ClimateBoost + EnviBoost);
@@ -208,12 +324,19 @@ public class Zombie : MonoBehaviour{
 
         //预制体初始化
         Image.spriteName = zombie.Res;
-        //Image.spriteName = "Emoticon - Laugh";
         LabelName.text = LocalizationEx.LoadLanguageTextName(zombie.Name);
         HPBar.GetComponent<UISlider>().value = (float)(HP * 1.0f / MaxHP);
         ClimIcon.spriteName = Formula.ClimateIcon(ref ClimIcon, Clim);
         EnviIcon.spriteName = Formula.EnviIcon(ref ClimIcon, envi);
-        AbilityIcon.spriteName = "Button Y";
+        foreach(SpecialAbility_Sheet sas in DataManager.SpecialAbility_Ability)
+        {
+            if(sas.ID == SkillID)
+            {
+                SkillIcon.spriteName = sas.ResIcon;
+                param = int.Parse(sas.Value1) + int.Parse(sas.Value1_Add);
+                break;
+            }
+        }        
     }
 
     public Zombie ZombieBattleEvent()

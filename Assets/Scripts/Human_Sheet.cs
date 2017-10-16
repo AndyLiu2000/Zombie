@@ -9,10 +9,10 @@ public class Human_Sheet
     public string HumanID;
     public string MaxHP;
     public string MaxInfection;
-    public string Atk_P;
-    public string Atk_M;
-    public string Def_P;
-    public string Def_M;
+    public string Atk;
+    public string Heal;
+    public string Def;
+    public string Cure;
     public string InfectShield;
     public string InfectionAnti;
     public string CommunicationAnti;
@@ -26,4 +26,5 @@ public class Human_Sheet
     public string Weight;
     public string Name;
     public string Res;
+    public string SkillID;
 }

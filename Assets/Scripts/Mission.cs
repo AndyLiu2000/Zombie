@@ -15,10 +15,10 @@ public class Mission_Sheet
     public string MissionID;
     public string MaxHPBoost;
     public string InfectionBoost;
-    public string Atk_P_Boost;
-    public string Atk_M_Boost;
-    public string Def_P_Boost;
-    public string Def_M_Boost;
+    public string Atk_Boost;
+    public string Heal_Boost;
+    public string Def_Boost;
+    public string Cure_Boost;
     public string Speed_Boost;
     public string InfectionAntiBoost;
     public string CommunicationAntiBoost;

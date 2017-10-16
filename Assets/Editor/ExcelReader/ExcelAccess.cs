@@ -222,10 +222,10 @@ public class ExcelAccess
             Parameter.MissionID = collect[i][0].ToString();
             Parameter.MaxHPBoost = collect[i][1].ToString();
             Parameter.InfectionBoost = collect[i][2].ToString();
-            Parameter.Atk_P_Boost = collect[i][3].ToString();
-            Parameter.Atk_M_Boost = collect[i][4].ToString();
-            Parameter.Def_P_Boost = collect[i][5].ToString();
-            Parameter.Def_M_Boost = collect[i][6].ToString();
+            Parameter.Atk_Boost = collect[i][3].ToString();
+            Parameter.Heal_Boost = collect[i][4].ToString();
+            Parameter.Def_Boost = collect[i][5].ToString();
+            Parameter.Cure_Boost = collect[i][6].ToString();
             Parameter.Speed_Boost = collect[i][7].ToString();
             Parameter.InfectionAntiBoost = collect[i][8].ToString();
             Parameter.CommunicationAntiBoost = collect[i][9].ToString();
@@ -298,6 +298,9 @@ public class ExcelAccess
             Virus.Des = collect[i][28].ToString();
             Virus.Res = collect[i][29].ToString();
             Virus.StrategyID = collect[i][30].ToString();
+            Virus.Medi_Start = collect[i][31].ToString();
+            Virus.Medi_Work = collect[i][32].ToString();
+            Virus.Medi_Spd = collect[i][33].ToString();
 
             array.Add(Virus);
         }
@@ -318,10 +321,10 @@ public class ExcelAccess
             Human.HumanID = collect[i][0].ToString();
             Human.MaxHP = collect[i][1].ToString();
             Human.MaxInfection = collect[i][2].ToString();
-            Human.Atk_P = collect[i][3].ToString();
-            Human.Atk_M = collect[i][4].ToString();
-            Human.Def_P = collect[i][5].ToString();
-            Human.Def_M = collect[i][6].ToString();
+            Human.Atk = collect[i][3].ToString();
+            Human.Heal = collect[i][4].ToString();
+            Human.Def = collect[i][5].ToString();
+            Human.Cure = collect[i][6].ToString();
             Human.InfectShield = collect[i][7].ToString();
             Human.InfectionAnti = collect[i][8].ToString();
             Human.CommunicationAnti = collect[i][9].ToString();
@@ -335,6 +338,7 @@ public class ExcelAccess
             Human.Weight = collect[i][17].ToString();
             Human.Name = collect[i][18].ToString();
             Human.Res = collect[i][19].ToString();
+            Human.SkillID = collect[i][20].ToString();
 
             array.Add(Human);
         }
@@ -354,10 +358,10 @@ public class ExcelAccess
             Zombie_Sheet Zombie = new Zombie_Sheet();
             Zombie.ZombieID = collect[i][0].ToString();
             Zombie.MaxHP = collect[i][1].ToString();
-            Zombie.Atk_P = collect[i][2].ToString();
-            Zombie.Atk_M = collect[i][3].ToString();
-            Zombie.Def_P = collect[i][4].ToString();
-            Zombie.Def_M = collect[i][5].ToString();
+            Zombie.Atk = collect[i][2].ToString();
+            Zombie.Heal = collect[i][3].ToString();
+            Zombie.Def = collect[i][4].ToString();
+            Zombie.Infect = collect[i][5].ToString();
             Zombie.Speed = collect[i][6].ToString();
             Zombie.HPDecay = collect[i][7].ToString();
             Zombie.DrainLife = collect[i][8].ToString();
@@ -371,6 +375,7 @@ public class ExcelAccess
             Zombie.Weight = collect[i][16].ToString();
             Zombie.Name = collect[i][17].ToString();
             Zombie.Res = collect[i][18].ToString();
+            Zombie.SkillID = collect[i][19].ToString();
 
             array.Add(Zombie);
         }
@@ -389,7 +394,7 @@ public class ExcelAccess
 
             SpecialAbility_Sheet Ability = new SpecialAbility_Sheet();
             Ability.ID = collect[i][0].ToString();
-            Ability.Type = collect[i][1].ToString();
+            Ability.ResIcon = collect[i][1].ToString();
             Ability.Name = collect[i][2].ToString();
             Ability.Value1 = collect[i][3].ToString();
             Ability.Value1_Add = collect[i][4].ToString();

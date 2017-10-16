@@ -280,6 +280,9 @@ public class Formula {
     static void InGameEvent(InGameEvent_Sheet ige)
     {
         Battle_C bc = GameObject.Find(GameManager.BATTLE).GetComponent<Battle_C>();
+
+
+
         int fieldValue = 0;
         Type t;
         Type tf;
@@ -290,6 +293,32 @@ public class Formula {
             case "1":
                 Debug.Log("病毒处理");
                 Debug.Log("ige.FieldName = " + ige.FieldName);
+                if(ige.FieldName == "Split")
+                {
+                    List<GameObject> unInfectedHumans = new List<GameObject>();
+                    foreach (GameObject h in bc.HumanArray)
+                    {
+                        if (h.GetComponent<Human>().Infected == false)
+                        {
+                            //取得所有未感染的人类
+                            unInfectedHumans.Add(h);
+                        }
+                    }
+
+                    if (unInfectedHumans.Count > 0)
+                    {
+                        Debug.Log("找随机目标使其变为感染状态");
+                        GameObject unInfectedHuman = Formula.ListRandomElement(unInfectedHumans);
+
+                        unInfectedHuman.GetComponent<Human>().InfectShield = 0;
+                        unInfectedHuman.GetComponent<Human>().Infected = true;
+                        Debug.Log("感染一个新人类");
+                        bc.InfectNum += 1;
+                        bc.SP_Add(Human.INFECT_HUMAN_SP, bc.StrategyBtn, bc.LabelStrategy, false);
+                    }
+
+                    return;
+                }
 
                 //根据属性名，得到该属性现在的值
                 t = typeof(Virus);
@@ -345,7 +374,7 @@ public class Formula {
                         t.GetField(ige.FieldName).SetValue(z.GetComponent<Zombie>(), Convert.ChangeType(fieldValue * (1000 + int.Parse(ige.Value)) / 1000, tf));
                     }
                 }
-                //非0时作用于该ID的人类
+                //非0时作用于该ID的丧尸
                 else
                 {
                     foreach (GameObject z in bc.ZombieArray)
@@ -499,6 +528,12 @@ public class Formula {
     }
 
     public static GameObject ListRandomElement(List<GameObject> list)
+    {
+        int i = UnityEngine.Random.Range(0, list.Count);
+        return list[i];
+    }
+
+    public static object ArrayListRandomElement(ArrayList list)
     {
         int i = UnityEngine.Random.Range(0, list.Count);
         return list[i];

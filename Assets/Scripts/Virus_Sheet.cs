@@ -37,4 +37,7 @@ public class Virus_Sheet
     public string Des;
     public string Res;
     public string StrategyID;
+    public string Medi_Start;
+    public string Medi_Work;
+    public string Medi_Spd;
 }

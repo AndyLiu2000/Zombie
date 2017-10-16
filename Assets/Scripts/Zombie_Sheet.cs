@@ -8,10 +8,10 @@ public class Zombie_Sheet
     //标签页内的字段
     public string ZombieID;
     public string MaxHP;
-    public string Atk_P;
-    public string Atk_M;
-    public string Def_P;
-    public string Def_M;
+    public string Atk;
+    public string Heal;
+    public string Def;
+    public string Infect;
     public string Speed;
     public string HPDecay;
     public string DrainLife;
@@ -25,4 +25,5 @@ public class Zombie_Sheet
     public string Weight;
     public string Name;
     public string Res;
+    public string SkillID;
 }

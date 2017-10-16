@@ -34,6 +34,9 @@ public class Virus {
     public string Name;
     public string Res;
     public string StrategyID;
+    public int Medi_Start;
+    public int Medi_Work;
+    public int Medi_Spd;
 
     //战斗变量
     public Environment Envi;
@@ -80,32 +83,38 @@ public class Virus {
         CommunicateBlock_Envi_3 = int.Parse(virus.CommunicateBlock_Envi_3);
         InitialSP = int.Parse(virus.InitialSP);
         StrategyID = virus.StrategyID;
+        Medi_Start = int.Parse(virus.Medi_Start);
+        Medi_Work = int.Parse(virus.Medi_Work);
+        Medi_Spd = int.Parse(virus.Medi_Spd);
 
         //DNA值
-        InfectSpeed = (int)(InfectSpeed * (1000 + Formula.FieldNameToValue("InfectSpeed", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1])) / 1000);
-        InfectHuman_1 = (int)(InfectHuman_1 * (1000 + Formula.FieldNameToValue("InfectHuman_1", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1])) / 1000);
-        InfectHuman_2 = (int)(InfectHuman_2 * (1000 + Formula.FieldNameToValue("InfectHuman_2", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1])) / 1000);
-        InfectHuman_3 = (int)(InfectHuman_3 * (1000 + Formula.FieldNameToValue("InfectHuman_3", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1])) / 1000);
-        InfectHuman_4 = (int)(InfectHuman_4 * (1000 + Formula.FieldNameToValue("InfectHuman_4", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1])) / 1000);
-        InfectHuman_5 = (int)(InfectHuman_5 * (1000 + Formula.FieldNameToValue("InfectHuman_5", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1])) / 1000);
-        InfectBlock_Climate_1 = (int)(InfectBlock_Climate_1 * (1000 + Formula.FieldNameToValue("InfectBlock_Climate_1", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1])) / 1000);
-        InfectBlock_Climate_2 = (int)(InfectBlock_Climate_2 * (1000 + Formula.FieldNameToValue("InfectBlock_Climate_2", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1])) / 1000);
-        InfectBlock_Climate_3 = (int)(InfectBlock_Climate_3 * (1000 + Formula.FieldNameToValue("InfectBlock_Climate_3", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1])) / 1000);
-        InfectBlock_Envi_1 = (int)(InfectBlock_Envi_1 * (1000 + Formula.FieldNameToValue("InfectBlock_Envi_1", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1])) / 1000);
-        InfectBlock_Envi_2 = (int)(InfectBlock_Envi_2 * (1000 + Formula.FieldNameToValue("InfectBlock_Envi_2", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1])) / 1000);
-        InfectBlock_Envi_3 = (int)(InfectBlock_Envi_3 * (1000 + Formula.FieldNameToValue("InfectBlock_Envi_3", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1])) / 1000);
-        CommunicateRate = (int)(CommunicateRate * (1000 + Formula.FieldNameToValue("CommunicateRate", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1])) / 1000);
-        CommunicateHuman_1 = (int)(CommunicateHuman_1 * (1000 + Formula.FieldNameToValue("CommunicateHuman_1", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1])) / 1000);
-        CommunicateHuman_2 = (int)(CommunicateHuman_2 * (1000 + Formula.FieldNameToValue("CommunicateHuman_2", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1])) / 1000);
-        CommunicateHuman_3 = (int)(CommunicateHuman_3 * (1000 + Formula.FieldNameToValue("CommunicateHuman_3", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1])) / 1000);
-        CommunicateHuman_4 = (int)(CommunicateHuman_4 * (1000 + Formula.FieldNameToValue("CommunicateHuman_4", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1])) / 1000);
-        CommunicateHuman_5 = (int)(CommunicateHuman_5 * (1000 + Formula.FieldNameToValue("CommunicateHuman_5", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1])) / 1000);
-        CommunicateBlock_Climate_1 = (int)(CommunicateBlock_Climate_1 * (1000 + Formula.FieldNameToValue("CommunicateBlock_Climate_1", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1])) / 1000);
-        CommunicateBlock_Climate_2 = (int)(CommunicateBlock_Climate_2 * (1000 + Formula.FieldNameToValue("CommunicateBlock_Climate_2", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1])) / 1000);
-        CommunicateBlock_Climate_3 = (int)(CommunicateBlock_Climate_3 * (1000 + Formula.FieldNameToValue("CommunicateBlock_Climate_3", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1])) / 1000);
-        CommunicateBlock_Envi_1 = (int)(CommunicateBlock_Envi_1 * (1000 + Formula.FieldNameToValue("CommunicateBlock_Envi_1", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1])) / 1000);
-        CommunicateBlock_Envi_2 = (int)(CommunicateBlock_Envi_2 * (1000 + Formula.FieldNameToValue("CommunicateBlock_Envi_2", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1])) / 1000);
-        CommunicateBlock_Envi_3 = (int)(CommunicateBlock_Envi_3 * (1000 + Formula.FieldNameToValue("CommunicateBlock_Envi_3", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1])) / 1000);
+        InfectSpeed = (int)(InfectSpeed * (1000 + Formula.FieldNameToValue("InfectSpeed", DataManager.DNAUp_Virus, GameManager.user.DB_u_dna[1])) / 1000);
+        InfectHuman_1 = (int)(InfectHuman_1 * (1000 + Formula.FieldNameToValue("InfectHuman_1", DataManager.DNAUp_Virus, GameManager.user.DB_u_dna[1])) / 1000);
+        InfectHuman_2 = (int)(InfectHuman_2 * (1000 + Formula.FieldNameToValue("InfectHuman_2", DataManager.DNAUp_Virus, GameManager.user.DB_u_dna[1])) / 1000);
+        InfectHuman_3 = (int)(InfectHuman_3 * (1000 + Formula.FieldNameToValue("InfectHuman_3", DataManager.DNAUp_Virus, GameManager.user.DB_u_dna[1])) / 1000);
+        InfectHuman_4 = (int)(InfectHuman_4 * (1000 + Formula.FieldNameToValue("InfectHuman_4", DataManager.DNAUp_Virus, GameManager.user.DB_u_dna[1])) / 1000);
+        InfectHuman_5 = (int)(InfectHuman_5 * (1000 + Formula.FieldNameToValue("InfectHuman_5", DataManager.DNAUp_Virus, GameManager.user.DB_u_dna[1])) / 1000);
+        InfectBlock_Climate_1 = (int)(InfectBlock_Climate_1 * (1000 + Formula.FieldNameToValue("InfectBlock_Climate_1", DataManager.DNAUp_Virus, GameManager.user.DB_u_dna[1])) / 1000);
+        InfectBlock_Climate_2 = (int)(InfectBlock_Climate_2 * (1000 + Formula.FieldNameToValue("InfectBlock_Climate_2", DataManager.DNAUp_Virus, GameManager.user.DB_u_dna[1])) / 1000);
+        InfectBlock_Climate_3 = (int)(InfectBlock_Climate_3 * (1000 + Formula.FieldNameToValue("InfectBlock_Climate_3", DataManager.DNAUp_Virus, GameManager.user.DB_u_dna[1])) / 1000);
+        InfectBlock_Envi_1 = (int)(InfectBlock_Envi_1 * (1000 + Formula.FieldNameToValue("InfectBlock_Envi_1", DataManager.DNAUp_Virus, GameManager.user.DB_u_dna[1])) / 1000);
+        InfectBlock_Envi_2 = (int)(InfectBlock_Envi_2 * (1000 + Formula.FieldNameToValue("InfectBlock_Envi_2", DataManager.DNAUp_Virus, GameManager.user.DB_u_dna[1])) / 1000);
+        InfectBlock_Envi_3 = (int)(InfectBlock_Envi_3 * (1000 + Formula.FieldNameToValue("InfectBlock_Envi_3", DataManager.DNAUp_Virus, GameManager.user.DB_u_dna[1])) / 1000);
+        CommunicateRate = (int)(CommunicateRate * (1000 + Formula.FieldNameToValue("CommunicateRate", DataManager.DNAUp_Virus, GameManager.user.DB_u_dna[1])) / 1000);
+        CommunicateHuman_1 = (int)(CommunicateHuman_1 * (1000 + Formula.FieldNameToValue("CommunicateHuman_1", DataManager.DNAUp_Virus, GameManager.user.DB_u_dna[1])) / 1000);
+        CommunicateHuman_2 = (int)(CommunicateHuman_2 * (1000 + Formula.FieldNameToValue("CommunicateHuman_2", DataManager.DNAUp_Virus, GameManager.user.DB_u_dna[1])) / 1000);
+        CommunicateHuman_3 = (int)(CommunicateHuman_3 * (1000 + Formula.FieldNameToValue("CommunicateHuman_3", DataManager.DNAUp_Virus, GameManager.user.DB_u_dna[1])) / 1000);
+        CommunicateHuman_4 = (int)(CommunicateHuman_4 * (1000 + Formula.FieldNameToValue("CommunicateHuman_4", DataManager.DNAUp_Virus, GameManager.user.DB_u_dna[1])) / 1000);
+        CommunicateHuman_5 = (int)(CommunicateHuman_5 * (1000 + Formula.FieldNameToValue("CommunicateHuman_5", DataManager.DNAUp_Virus, GameManager.user.DB_u_dna[1])) / 1000);
+        CommunicateBlock_Climate_1 = (int)(CommunicateBlock_Climate_1 * (1000 + Formula.FieldNameToValue("CommunicateBlock_Climate_1", DataManager.DNAUp_Virus, GameManager.user.DB_u_dna[1])) / 1000);
+        CommunicateBlock_Climate_2 = (int)(CommunicateBlock_Climate_2 * (1000 + Formula.FieldNameToValue("CommunicateBlock_Climate_2", DataManager.DNAUp_Virus, GameManager.user.DB_u_dna[1])) / 1000);
+        CommunicateBlock_Climate_3 = (int)(CommunicateBlock_Climate_3 * (1000 + Formula.FieldNameToValue("CommunicateBlock_Climate_3", DataManager.DNAUp_Virus, GameManager.user.DB_u_dna[1])) / 1000);
+        CommunicateBlock_Envi_1 = (int)(CommunicateBlock_Envi_1 * (1000 + Formula.FieldNameToValue("CommunicateBlock_Envi_1", DataManager.DNAUp_Virus, GameManager.user.DB_u_dna[1])) / 1000);
+        CommunicateBlock_Envi_2 = (int)(CommunicateBlock_Envi_2 * (1000 + Formula.FieldNameToValue("CommunicateBlock_Envi_2", DataManager.DNAUp_Virus, GameManager.user.DB_u_dna[1])) / 1000);
+        CommunicateBlock_Envi_3 = (int)(CommunicateBlock_Envi_3 * (1000 + Formula.FieldNameToValue("CommunicateBlock_Envi_3", DataManager.DNAUp_Virus, GameManager.user.DB_u_dna[1])) / 1000);
+        Medi_Start = (int)(Medi_Start * (1000 + Formula.FieldNameToValue("Medi_Start", DataManager.DNAUp_Human, GameManager.user.DB_u_dna[1])) / 1000);
+        Medi_Work = (int)(Medi_Work * (1000 + Formula.FieldNameToValue("Medi_Work", DataManager.DNAUp_Virus, GameManager.user.DB_u_dna[1])) / 1000);
+        Medi_Spd = (int)(Medi_Spd * (1000 + Formula.FieldNameToValue("Medi_Spd", DataManager.DNAUp_Virus, GameManager.user.DB_u_dna[1])) / 1000);
 
         //return this;
 

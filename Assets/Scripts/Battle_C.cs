@@ -39,7 +39,8 @@ public class Battle_C : MonoBehaviour {
     const int SPBubble_SP = 3;
     const float SPBUBBLEDIAPPEAR = 3.0f;
     const int VIRUSNUM = 2;
-    const float MEDICINEWORK = 100000000.0f;
+    const int MEDICINEWORK = 100000000;
+    public int MEDICINESPD = 10;
 
     //关卡数据
     public int MissionID;
@@ -49,7 +50,7 @@ public class Battle_C : MonoBehaviour {
     float deltaTime2 = 0;
     float deltaTime3 = 0;
     public int VirusNum = VIRUSNUM;                //单局病毒量
-    public float Medicine = 0;              //解药当前进度
+    public float Medicine = 0;                      //解药当前进度
     public float MedicineWork = MEDICINEWORK;       //解药总进度
     public bool medicineOK = false;
     
@@ -106,6 +107,8 @@ public class Battle_C : MonoBehaviour {
     public ArrayList VirusGeneArray = new ArrayList();
     public ArrayList HumanGeneArray = new ArrayList();
     public ArrayList ZombieGeneArray = new ArrayList();
+    public ArrayList InfectedHumans = new ArrayList();
+    public ArrayList UnInfectedHumans = new ArrayList();
 
     public List<Infection_Sheet> InfectionList = new List<Infection_Sheet>();
     public List<Damage_Sheet> DamageList = new List<Damage_Sheet>();
@@ -156,8 +159,10 @@ public class Battle_C : MonoBehaviour {
         BC.VirusNum = VIRUSNUM;
         mode = curMode;
 
+        LoadEntity(VirusID, MissionID);
+
         BC.Medicine = 0.0f;
-        BC.MedicineWork = MEDICINEWORK;
+        BC.MedicineWork = MEDICINEWORK * CurVirus.Medi_Work / 1000;
         BC.medicineOK = false;
 
         for(int i = 0; i < DataManager.InfectionSheet.Count; i++)
@@ -170,7 +175,7 @@ public class Battle_C : MonoBehaviour {
             BC.DamageList.Add(DataManager.DamageSheet[i]);
         }
 
-        LoadEntity(VirusID,MissionID);
+        
         LoadBattleEvent(MissionID);
         LoadBattleStrategy("1");
 
@@ -334,7 +339,7 @@ public class Battle_C : MonoBehaviour {
         if (BattleState == BattleState.Start)
         {
             Debug.Log("BattleState.Start");
-            MedicineBar.GetComponent<UISlider>().value = BC.Medicine / BC.MedicineWork;
+            MedicineBar.GetComponent<UISlider>().value = BC.Medicine * 1.0f / BC.MedicineWork;
 
             LabelStrategyPoint.GetComponent<UILabel>().text = BC.StrategyPoint.ToString();
         }
@@ -438,7 +443,7 @@ public class Battle_C : MonoBehaviour {
                 BC.medicineOK = true;
             }
 
-            MedicineBar.GetComponent<UISlider>().value = BC.Medicine / BC.MedicineWork;
+            MedicineBar.GetComponent<UISlider>().value = BC.Medicine * 1.0f / BC.MedicineWork;
 
             //模式专属模块
             switch (mode)
@@ -561,12 +566,17 @@ public class Battle_C : MonoBehaviour {
 
         if (!isDisplayOnly)
         {
+            //给StrategyBtn用时
             //要有逻辑变化时
             StrategyPoint += sp_A;
+            
         }
         else
         {
+            //气泡本身用时
             //无逻辑变化时
+            fatherObj.GetComponent<UIButton>().state = UIButton.State.Disabled;
+            fatherObj.GetComponent<BoxCollider>().enabled = false;
             Destroy(fatherObj,1.5f);
         }
     }
