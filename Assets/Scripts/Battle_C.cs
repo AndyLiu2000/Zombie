@@ -82,6 +82,10 @@ public class Battle_C : MonoBehaviour {
     public GameObject SpeedBtn;
     public GameObject strategyCloseBtn;
     public GameObject MedicineBar;
+    public GameObject VirusProBar;
+    public GameObject HumanProBar;
+    public GameObject ZombieProBar;
+    public UILabel Timer;
     UILabel Label_EvolutionDes;
     UILabel LabelEvolutionCost;
     UILabel LabelSpeed;
@@ -258,20 +262,32 @@ public class Battle_C : MonoBehaviour {
         }
 
         Debug.Log("更新数据");
+        int virusUpgradedQua = 0;
         foreach (GameObject go in VirusGeneArray)
         {
             go.GetComponent<Gene>().UpdateData(boardID);
+            if (go.GetComponent<Gene>().IsUpgraded)
+                virusUpgradedQua++;
         }
+        VirusProBar.GetComponent<UIProgressBar>().value = virusUpgradedQua * 1.0f / VirusGeneArray.Count;
 
+        int humanUpgradedQua = 0;
         foreach (GameObject go in HumanGeneArray)
         {
             go.GetComponent<Gene>().UpdateData(boardID);
+            if (go.GetComponent<Gene>().IsUpgraded)
+                humanUpgradedQua++;
         }
+        HumanProBar.GetComponent<UIProgressBar>().value = humanUpgradedQua * 1.0f / HumanGeneArray.Count;
 
+        int zombieUpgradedQua = 0;
         foreach (GameObject go in ZombieGeneArray)
         {
             go.GetComponent<Gene>().UpdateData(boardID);
+            if (go.GetComponent<Gene>().IsUpgraded)
+                zombieUpgradedQua++;
         }
+        ZombieProBar.GetComponent<UIProgressBar>().value = zombieUpgradedQua * 1.0f / ZombieGeneArray.Count;
 
         //清空Label的内容
         switch (boardID)
@@ -342,6 +358,8 @@ public class Battle_C : MonoBehaviour {
             MedicineBar.GetComponent<UISlider>().value = BC.Medicine * 1.0f / BC.MedicineWork;
 
             LabelStrategyPoint.GetComponent<UILabel>().text = BC.StrategyPoint.ToString();
+
+            Timer.text = "";
         }
 
         if (BattleState == BattleState.Game)
@@ -350,6 +368,7 @@ public class Battle_C : MonoBehaviour {
 
             //战斗用时计时器 battle timer
             TimeSecond += Time.fixedDeltaTime;
+            Timer.text = "" + (int)TimeSecond + LocalizationEx.LoadLanguageTextName("Day");
             //战斗事件计时器 battle event timer
             deltaTime += Time.fixedDeltaTime;
             //系统定时给予策略点计时器 sp timer

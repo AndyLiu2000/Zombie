@@ -301,6 +301,7 @@ public class ExcelAccess
             Virus.Medi_Start = collect[i][31].ToString();
             Virus.Medi_Work = collect[i][32].ToString();
             Virus.Medi_Spd = collect[i][33].ToString();
+            Virus.CommunicationThreshold = collect[i][34].ToString();
 
             array.Add(Virus);
         }

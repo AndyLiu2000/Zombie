@@ -5,7 +5,7 @@ using UnityEngine;
 public class Zombie : MonoBehaviour{
 
     private float ATTACK_INTERVAL = 5.0f;
-    private float HEALTH_INTERVAL = 1.0f;
+    private float HEALTH_INTERVAL = 5.0f;
 
     //Model：丧尸
     public float ZombieID;
@@ -44,7 +44,7 @@ public class Zombie : MonoBehaviour{
     Battle_C Battle;
 
     //环境变量
-    float oneSecondDeltaTime = 0;
+    float healDeltaTime = 0;
     float skillDeltaTime = 0;
     
 
@@ -64,13 +64,13 @@ public class Zombie : MonoBehaviour{
 
         if (GameManager.BC.BattleState == BattleState.Game)
         {
-            oneSecondDeltaTime += Time.fixedDeltaTime;
+            healDeltaTime += Time.fixedDeltaTime;
             skillDeltaTime += Time.fixedDeltaTime;
 
             //失血
-            if (oneSecondDeltaTime >= HEALTH_INTERVAL)
+            if (healDeltaTime >= HEALTH_INTERVAL)
             {
-                self.HP -= (int)Mathf.Round(HPDecay);
+                self.HP -= HPDecay;
                 HPBar.GetComponent<UISlider>().value = (float)(HP * 1.0f / MaxHP);
             }
 
@@ -113,12 +113,12 @@ public class Zombie : MonoBehaviour{
             }
 
             //按秒执行操作
-            if (oneSecondDeltaTime >= ATTACK_INTERVAL)
+            if (healDeltaTime >= HEALTH_INTERVAL)
             {
-                oneSecondDeltaTime = 0.0f;
+                healDeltaTime = 0.0f;
             }
 
-            if (skillDeltaTime >= 5.0f)
+            if (skillDeltaTime >= ATTACK_INTERVAL)
             {
                 skillDeltaTime = 0.0f;
             }
@@ -133,14 +133,20 @@ public class Zombie : MonoBehaviour{
 
     void RandomSingleAttack()
     {
-        Debug.Log("Zombie-RandomSingleAttack");
+        //Debug.Log("Zombie-RandomSingleAttack");
         if (GameManager.BC.HumanArray.Count > 0)
         {
             GameObject human = Formula.ArrayListRandomElement(Battle.HumanArray) as GameObject;
             Human aHuman = human.GetComponent<Human>();
             if (Atk * param / 1000 >= aHuman.Def)
             {
-                aHuman.HP -= (int)(Atk * param / 1000 - aHuman.Def);
+                int deltaHumanHP = (int)(Atk * param / 1000 - aHuman.Def);
+
+                aHuman.HP -= deltaHumanHP;      //人类失血
+
+                HP += deltaHumanHP * DrainLife / 1000;  //丧尸吸血
+                if (HP > MaxHP)
+                    HP = MaxHP;
                 GenerateSEInGameobjectPosition(human, "Skill_Behit_H", true, null);
             }
         }
@@ -176,7 +182,7 @@ public class Zombie : MonoBehaviour{
 
     void RandomSingleHeal()
     {
-        Debug.Log("Zombie-RandomSingleHeal");
+        //Debug.Log("Zombie-RandomSingleHeal");
         if (GameManager.BC.ZombieArray.Count > 0)
         {
             GameObject zombie = Formula.ArrayListRandomElement(GameManager.BC.ZombieArray) as GameObject;
@@ -191,7 +197,7 @@ public class Zombie : MonoBehaviour{
 
     void RandomSingle_AttackInfect()
     {
-        Debug.Log("Zombie-RandomSingle_AttackInfect");
+        //Debug.Log("Zombie-RandomSingle_AttackInfect");
         if (GameManager.BC.HumanArray.Count > 0)
         {
             GameObject human = Formula.ArrayListRandomElement(GameManager.BC.HumanArray) as GameObject;

@@ -98,8 +98,8 @@ public class DNA_C : MonoBehaviour {
         if (sheet == DataManager.DNAUp_Virus)
         {
             //金币消耗的算法要改
-            GO.GetComponent<DNACell>().GLabel.text = (long.Parse(DataManager.DNAUp_Virus[cellID].GoldCost) * GameManager.user.DB_u_dna[0][cellID - 1].Lv).ToString();
-            GO.GetComponent<DNACell>().CLabel.text = (long.Parse(DataManager.DNAUp_Virus[cellID].GemCost) * GameManager.user.DB_u_dna[0][cellID - 1].Lv).ToString();
+            GO.GetComponent<DNACell>().GLabel.text = (long.Parse(DataManager.DNAUp_Virus[cellID].GoldCost) + long.Parse(DataManager.DNAUp_Virus[cellID].GoldParam_1) * GameManager.user.DB_u_dna[0][cellID - 1].Lv).ToString();
+            GO.GetComponent<DNACell>().CLabel.text = (long.Parse(DataManager.DNAUp_Virus[cellID].GemCost) + long.Parse(DataManager.DNAUp_Virus[cellID].GemParam_1) * GameManager.user.DB_u_dna[0][cellID - 1].Lv).ToString();
 
             //传递Cell数据
             GO.GetComponent<DNACell>().CellType = DNAType.Virus;
@@ -116,8 +116,8 @@ public class DNA_C : MonoBehaviour {
 
         if (sheet == DataManager.DNAUp_Human)
         {
-            GO.GetComponent<DNACell>().GLabel.text = (long.Parse(DataManager.DNAUp_Human[cellID].GoldCost) * GameManager.user.DB_u_dna[1][cellID - 1].Lv).ToString();
-            GO.GetComponent<DNACell>().CLabel.text = (long.Parse(DataManager.DNAUp_Human[cellID].GemCost) * GameManager.user.DB_u_dna[1][cellID - 1].Lv).ToString();
+            GO.GetComponent<DNACell>().GLabel.text = (long.Parse(DataManager.DNAUp_Human[cellID].GoldCost) + long.Parse(DataManager.DNAUp_Human[cellID].GemParam_1) * GameManager.user.DB_u_dna[1][cellID - 1].Lv).ToString();
+            GO.GetComponent<DNACell>().CLabel.text = (long.Parse(DataManager.DNAUp_Human[cellID].GemCost) + long.Parse(DataManager.DNAUp_Human[cellID].GemParam_1) * GameManager.user.DB_u_dna[1][cellID - 1].Lv).ToString();
 
             GO.GetComponent<DNACell>().CellType = DNAType.Human;
             foreach (U_DNA humanData in GameManager.user.DB_u_dna[1])
@@ -133,8 +133,8 @@ public class DNA_C : MonoBehaviour {
 
         if (sheet == DataManager.DNAUp_Zombie)
         {
-            GO.GetComponent<DNACell>().GLabel.text = (long.Parse(DataManager.DNAUp_Zombie[cellID].GoldCost) * GameManager.user.DB_u_dna[2][cellID - 1].Lv).ToString();
-            GO.GetComponent<DNACell>().CLabel.text = (long.Parse(DataManager.DNAUp_Zombie[cellID].GemCost) * GameManager.user.DB_u_dna[2][cellID - 1].Lv).ToString();
+            GO.GetComponent<DNACell>().GLabel.text = (long.Parse(DataManager.DNAUp_Zombie[cellID].GoldCost) + long.Parse(DataManager.DNAUp_Zombie[cellID].GoldParam_1) * GameManager.user.DB_u_dna[2][cellID - 1].Lv).ToString();
+            GO.GetComponent<DNACell>().CLabel.text = (long.Parse(DataManager.DNAUp_Zombie[cellID].GemCost) + long.Parse(DataManager.DNAUp_Zombie[cellID].GemParam_1) * GameManager.user.DB_u_dna[2][cellID - 1].Lv).ToString();
 
             GO.GetComponent<DNACell>().CellType = DNAType.Zombie;
             foreach (U_DNA zombieData in GameManager.user.DB_u_dna[2])

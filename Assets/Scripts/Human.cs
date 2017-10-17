@@ -8,8 +8,10 @@ public class Human : MonoBehaviour{
     const int KILL_HUMAN_SP = 5;
     public const int INFECT_HUMAN_SP = 4;
     const float INFECT_BTN_DISAPPEAR = 1.0f;
-    const int INFECTION_THRESHOLD = 30; //传染的感染度临界值
-    const float INFECT_INTERVAL = 5.0f;
+    //const int INFECTION_THRESHOLD = 30; //传染的感染度临界值
+    const float HEAL_INTERVAL = 5.0f;
+    const float INFECT_INTERVAL = 1.0f;
+    const float COMMUNICATE_INTERVAL = 2.0f;
     const float ATTACK_INTERVAL = 5.0f;
 
     //Model：Human
@@ -56,9 +58,10 @@ public class Human : MonoBehaviour{
 
     //环境变量
     Battle_C Battle;
-    float oneSecondDeltaTime = 0;
+    float healDeltaTime = 0;
     float skillDeltaTime = 0;
     float infectDeltaTime = 0;
+    float communicateDeltaTime = 0;
     Human self;
     
 
@@ -85,14 +88,15 @@ public class Human : MonoBehaviour{
 
         if (Battle.BattleState == BattleState.Game)
         {
-            oneSecondDeltaTime += Time.fixedDeltaTime;
+            healDeltaTime += Time.fixedDeltaTime;
             infectDeltaTime += Time.fixedDeltaTime;
+            communicateDeltaTime += Time.fixedDeltaTime;
             skillDeltaTime += Time.fixedDeltaTime;
 
             //回血 restore
             if (self.HP < self.MaxHP)
             {
-                if (oneSecondDeltaTime >= 1.0f)
+                if (healDeltaTime >= HEAL_INTERVAL)
                 {
                     self.HP += HPHealing;
                 }
@@ -114,11 +118,15 @@ public class Human : MonoBehaviour{
             //感染 infect
             if (self.Infected)
             {
-                if (oneSecondDeltaTime >= 1.0f)
+                if (infectDeltaTime >= INFECT_INTERVAL)
                 {
                     //感染加深
-                    Infection += Battle.CurVirus.InfectSpeed;
-                    Infection += 200;
+                    int infect = Battle.CurVirus.InfectSpeed
+                        * (1000+Battle.CurVirus.InfectHumans[HumanID - 1]) /1000
+                        * (1000+Battle.CurVirus.InfectClims[(int)Clim]) / 1000
+                        * (1000+Battle.CurVirus.InfectEnvis[(int)Envi]) /1000
+                        - InfectionAnti;
+                    Infection += infect > 0 ? infect : 0;
                     InfectionBar.GetComponent<UISlider>().value = (float)(Infection * 1.0f / MaxInfection);
 
                     //解药研发 research
@@ -140,10 +148,10 @@ public class Human : MonoBehaviour{
                 }
 
                 //传染，大于临界值才开始传染
-                if (MaxInfection <= INFECTION_THRESHOLD * Infection)
+                if (MaxInfection <= Battle.CurVirus.CommunicationThreshold * Infection)
                 {
                     //Battle.CurVirus.CommunicateRate用在这里，缩短传染的时间间隔
-                    if (infectDeltaTime >= INFECT_INTERVAL * 1000 / (1000 + Battle.CurVirus.CommunicateRate))
+                    if (communicateDeltaTime >= COMMUNICATE_INTERVAL * 1000 / (1000 + Battle.CurVirus.CommunicateRate))
                     {
                         List<GameObject> unInfectedHumans = new List<GameObject>();
                         foreach (GameObject h in Battle.HumanArray)
@@ -159,16 +167,30 @@ public class Human : MonoBehaviour{
                         {
                             Debug.Log("找随机目标传染一次");
                             GameObject unInfectedHuman = Formula.ListRandomElement(unInfectedHumans);
-                            unInfectedHuman.GetComponent<Human>().InfectShield -= Battle.CurVirus.InfectSpeed;
-                            if (unInfectedHuman.GetComponent<Human>().InfectShield < 0)
+                            int random = UnityEngine.Random.Range(0, 1000);
+                            int c = CommunicationAnti
+                                * (1000 + Battle.CurVirus.CommunicateHumans[HumanID - 1]) / 1000
+                                * (1000 + Battle.CurVirus.CommunicateClimates[(int)Clim]) / 1000
+                                * (1000 + Battle.CurVirus.CommunicateEnvis[(int)Envi]) / 1000;
+                            Debug.Log("random = " + random + ", c = " + c);
+                            //随机数大于抗传染概率时，才成功传染
+                            if (random > CommunicationAnti
+                                * (1000 + Battle.CurVirus.CommunicateHumans[HumanID - 1]) / 1000
+                                * (1000 + Battle.CurVirus.CommunicateClimates[(int)Clim]) / 1000
+                                * (1000 + Battle.CurVirus.CommunicateEnvis[(int)Envi]) / 1000)
                             {
-                                unInfectedHuman.GetComponent<Human>().InfectShield = 0;
-                                unInfectedHuman.GetComponent<Human>().Infected = true;
-                                Debug.Log("感染一个新人类");
-                                Battle.InfectNum += 1;
-                                Battle.SP_Add(INFECT_HUMAN_SP, Battle.StrategyBtn, Battle.LabelStrategy, false);
+                                unInfectedHuman.GetComponent<Human>().InfectShield -= Battle.CurVirus.InfectSpeed;
+                                if (unInfectedHuman.GetComponent<Human>().InfectShield < 0)
+                                {
+                                    unInfectedHuman.GetComponent<Human>().InfectShield = 0;
+                                    unInfectedHuman.GetComponent<Human>().Infected = true;
+                                    Debug.Log("传染一个新人类");
+                                    Battle.InfectNum += 1;
+                                    Battle.SP_Add(INFECT_HUMAN_SP, Battle.StrategyBtn, Battle.LabelStrategy, false);
+                                }
+                                Debug.Log("InfectShield = " + unInfectedHuman.GetComponent<Human>().InfectShield);
                             }
-                            Debug.Log("InfectShield = " + unInfectedHuman.GetComponent<Human>().InfectShield);
+                            
                         }
                         
                     }
@@ -208,14 +230,20 @@ public class Human : MonoBehaviour{
             }
 
             //按秒执行操作
-            if (oneSecondDeltaTime >= 1.0f)
+            if (healDeltaTime >= HEAL_INTERVAL)
             {
-                oneSecondDeltaTime = 0.0f;
+                healDeltaTime = 0.0f;
             }
 
-            if (infectDeltaTime >= INFECT_INTERVAL * 1000 / (1000 + Battle.CurVirus.CommunicateRate))
+            //按秒执行操作
+            if (infectDeltaTime >= INFECT_INTERVAL)
             {
                 infectDeltaTime = 0.0f;
+            }
+
+            if (communicateDeltaTime >= COMMUNICATE_INTERVAL * 1000 / (1000 + Battle.CurVirus.CommunicateRate))
+            {
+                communicateDeltaTime = 0.0f;
             }
         }
 
@@ -252,7 +280,7 @@ public class Human : MonoBehaviour{
 
     void CureSelfInfection()
     {
-        Debug.Log("Human-CureSelfInfection");
+        //Debug.Log("Human-CureSelfInfection");
 
         Infection += Cure * param / 1000;
         if (Infection <= 0)
@@ -263,7 +291,7 @@ public class Human : MonoBehaviour{
 
     void GenerateSEInGameobjectPosition(GameObject go, string seName, bool isSelfActive,string invokeName)
     {
-        Debug.Log("seName = " + seName);
+        //Debug.Log("seName = " + seName);
         GameObject se = NGUITools.AddChild(GameManager.BC.Entity, (GameObject)(Resources.Load("SEPrefabs" + "/" + seName)));
         se.transform.localScale = new Vector3(80, 80, 1);        //该死的Unity，把动画文件加载的时候默认缩小为1/100了，所以这里要扩大100倍。注意，改Prefabs的缩放比例是没用的
         NGUITools.SetDirty(GameManager.BC.Entity);
@@ -279,7 +307,7 @@ public class Human : MonoBehaviour{
 
     void RandomSingleHeal()
     {
-        Debug.Log("Human-RandomSingleHeal");
+        //Debug.Log("Human-RandomSingleHeal");
         if (GameManager.BC.HumanArray.Count > 0)
         {
             GameObject human = Formula.ArrayListRandomElement(Battle.HumanArray) as GameObject;
@@ -294,7 +322,7 @@ public class Human : MonoBehaviour{
 
     void RandomSingle_HealCure()
     {
-        Debug.Log("Human-RandomSingle_HealCure");
+        //Debug.Log("Human-RandomSingle_HealCure");
         if (GameManager.BC.HumanArray.Count > 0)
         {
             GameObject human = Formula.ArrayListRandomElement(GameManager.BC.HumanArray) as GameObject;
