@@ -14,7 +14,7 @@ public class VirusSelect : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        VirusSelectBackBtn = GameObject.Find("VirusSelectBackBtn");
+        //VirusSelectBackBtn = GameObject.Find("VirusSelectBackBtn");
 
         UIEventListener.Get(VirusSelectBackBtn).onClick = VirusSelectBackBtn_Click;
 

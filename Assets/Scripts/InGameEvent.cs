@@ -18,7 +18,7 @@ public class InGameEvent_Sheet
     public string FieldName;
     public string EventType;
     public string Value;
-    public string NameID;
+    public string SkillIconName;
     public string DesID;
     public string UpgradeEffectID;
 }

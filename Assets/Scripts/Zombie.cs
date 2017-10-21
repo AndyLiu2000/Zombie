@@ -249,6 +249,9 @@ public class Zombie : MonoBehaviour{
         HPDecay = int.Parse(zombie.HPDecay);
         DrainLife = int.Parse(zombie.DrainLife);
 
+        Clim = clim;
+        Envi = envi;
+
         //根据随机分配到的气候和环境来决定使用哪个参数
         switch (clim)
         {
@@ -315,14 +318,7 @@ public class Zombie : MonoBehaviour{
                 break;
         }
 
-        MaxHP = MaxHP * 1000 / (1000 + ClimateBoost + EnviBoost);
-        Atk = Atk * 1000 / (1000 + ClimateBoost + EnviBoost);
-        Heal = Heal * 1000 / (1000 + ClimateBoost + EnviBoost);
-        Def = Def * 1000 / (1000 + ClimateBoost + EnviBoost);
-        Infect = Infect * 1000 / (1000 + ClimateBoost + EnviBoost);
-        Speed = Speed * 1000 / (1000 + ClimateBoost + EnviBoost);
-        HPDecay = HPDecay * 1000 / (1000 + ClimateBoost + EnviBoost);
-        DrainLife = DrainLife * 1000 / (1000 + ClimateBoost + EnviBoost);
+        UpdateAttributes();
 
         //没有Mission值
 
@@ -343,6 +339,18 @@ public class Zombie : MonoBehaviour{
                 break;
             }
         }        
+    }
+
+    public void UpdateAttributes()
+    {
+        MaxHP = MaxHP * 1000 / (1000 + ClimateBoost + EnviBoost);
+        Atk = Atk * 1000 / (1000 + ClimateBoost + EnviBoost);
+        Heal = Heal * 1000 / (1000 + ClimateBoost + EnviBoost);
+        Def = Def * 1000 / (1000 + ClimateBoost + EnviBoost);
+        Infect = Infect * 1000 / (1000 + ClimateBoost + EnviBoost);
+        Speed = Speed * 1000 / (1000 + ClimateBoost + EnviBoost);
+        HPDecay = HPDecay * 1000 / (1000 + ClimateBoost + EnviBoost);
+        DrainLife = DrainLife * 1000 / (1000 + ClimateBoost + EnviBoost);
     }
 
     public Zombie ZombieBattleEvent()

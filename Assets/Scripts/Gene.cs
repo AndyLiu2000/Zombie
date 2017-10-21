@@ -84,13 +84,25 @@ public class Gene : MonoBehaviour {
         //State = GeneState.UnVisible;
 
         //设定位置
-        Pos = new Vector3(Column * 10.0f, Row * 10.0f,1.0f);
+        Pos = new Vector3(Column * 60.0f, -Row * 60.0f,1.0f);
 
         //如果两个父节点都为0，则为初始可见的 if both father nodes are 0, it's visible
         if(FP1 == "0" && FP2 == "0")
         {
             IsFatherUnlocked = true;
             IsVisible = true;
+        }
+
+        foreach(InGameEvent_Sheet ige in DataManager.InGameEvent_InGameEvents)
+        {
+            if(EventID == ige.EventID)
+            {
+                gameObject.GetComponent<UISprite>().spriteName = ige.SkillIconName;
+                gameObject.GetComponent<UIButton>().normalSprite = ige.SkillIconName;
+                gameObject.GetComponent<UIButton>().hoverSprite = ige.SkillIconName;
+                gameObject.GetComponent<UIButton>().pressedSprite = ige.SkillIconName;
+                gameObject.GetComponent<UIButton>().disabledSprite = ige.SkillIconName;
+            }
         }
     }
 

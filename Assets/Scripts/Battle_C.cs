@@ -39,7 +39,7 @@ public class Battle_C : MonoBehaviour {
     const int SPBubble_SP = 3;
     const float SPBUBBLEDIAPPEAR = 3.0f;
     const int VIRUSNUM = 2;
-    const int MEDICINEWORK = 100000000;
+    const int MEDICINEWORK = 50000;
     public int MEDICINESPD = 10;
 
     //关卡数据
@@ -49,6 +49,7 @@ public class Battle_C : MonoBehaviour {
     float deltaTime = 0;
     float deltaTime2 = 0;
     float deltaTime3 = 0;
+    float currentTimeScale = 1.0f;
     public int VirusNum = VIRUSNUM;                //单局病毒量
     public float Medicine = 0;                      //解药当前进度
     public float MedicineWork = MEDICINEWORK;       //解药总进度
@@ -89,6 +90,8 @@ public class Battle_C : MonoBehaviour {
     UILabel Label_EvolutionDes;
     UILabel LabelEvolutionCost;
     UILabel LabelSpeed;
+    public UILabel MediName;
+    public UILabel MediPercent;
 
     //模具引用 prefabs
     public GameObject HumanModel;
@@ -98,6 +101,7 @@ public class Battle_C : MonoBehaviour {
     public Gene GeneSelected;
     public GameObject LabelSP;
     public GameObject SP_Bubble;
+
 
     //各单位集合 entity arraylists
     public Virus CurVirus;
@@ -169,7 +173,10 @@ public class Battle_C : MonoBehaviour {
         BC.MedicineWork = MEDICINEWORK * CurVirus.Medi_Work / 1000;
         BC.medicineOK = false;
 
-        for(int i = 0; i < DataManager.InfectionSheet.Count; i++)
+        MediName.text = LocalizationEx.LoadLanguageTextName("MediName");
+        MediPercent.text = "";
+
+        for (int i = 0; i < DataManager.InfectionSheet.Count; i++)
         {
             BC.InfectionList.Add(DataManager.InfectionSheet[i]);
         }
@@ -179,9 +186,8 @@ public class Battle_C : MonoBehaviour {
             BC.DamageList.Add(DataManager.DamageSheet[i]);
         }
 
-        
-        LoadBattleEvent(MissionID);
-        LoadBattleStrategy("1");
+        //LoadBattleEvent(MissionID);
+        //LoadBattleStrategy("1");
 
         BattleState = BattleState.Start;
     }
@@ -201,7 +207,7 @@ public class Battle_C : MonoBehaviour {
         {
             for (int j = 0; j < column; j++)
             {
-                HumanModel.GetComponent<Human>().CreatHuman(curMissionID);
+                HumanModel.GetComponent<Human>().CreateHuman(curMissionID);
 
                 GameObject hm = NGUITools.AddChild(Entity, HumanModel);
                 Vector3 pos = new Vector3((-column / 2 + j) * width, (-row / 2 + i) * height + height / 2,0);
@@ -463,6 +469,7 @@ public class Battle_C : MonoBehaviour {
             }
 
             MedicineBar.GetComponent<UISlider>().value = BC.Medicine * 1.0f / BC.MedicineWork;
+            MediPercent.text = (int)(MedicineBar.GetComponent<UISlider>().value * 100) + "%";
 
             //模式专属模块
             switch (mode)
@@ -504,12 +511,12 @@ public class Battle_C : MonoBehaviour {
                     {
                         //玩家失败
                         BC.Result = false;
-                        Debug.Log("Lose");
+                        Debug.Log("Lose:All Zombies Die and None Human is Infected");
                         BattleState = BattleState.End;
                     } else if (BC.medicineOK)                                                                      //如果研发出了解药，玩家失败
                     {
                         //玩家失败
-                        Debug.Log("Lose");
+                        Debug.Log("Lose:Medicine is Done");
                         BC.Result = false;
                         BattleState = BattleState.End;
                     }
@@ -539,6 +546,20 @@ public class Battle_C : MonoBehaviour {
             BC.UpgradedGenes_Virus.Clear();
             BC.UpgradedGenes_Human.Clear();
             BC.UpgradedGenes_Zombie.Clear();
+
+            foreach(GameObject go in BC.VirusGeneArray)
+            {
+                Destroy(go);
+            }
+            foreach (GameObject go in BC.HumanGeneArray)
+            {
+                Destroy(go);
+            }
+            foreach (GameObject go in BC.ZombieGeneArray)
+            {
+                Destroy(go);
+            }
+
             BC.VirusGeneArray.Clear();
             BC.HumanGeneArray.Clear();
             BC.ZombieGeneArray.Clear();
@@ -665,12 +686,14 @@ public class Battle_C : MonoBehaviour {
         if (Accelarate)
         {
             LabelSpeed.text = "X 4";
-            Time.timeScale = 4.0f;
+            currentTimeScale = 4.0f;
+            Time.timeScale = currentTimeScale;
         }
         else
         {
             LabelSpeed.text = "X 1";
-            Time.timeScale = 1.0f;
+            currentTimeScale = 1.0f;
+            Time.timeScale = currentTimeScale;
         }
     }
 
@@ -724,6 +747,6 @@ public class Battle_C : MonoBehaviour {
     {
         Debug.Log("StrategyCloseBtn_Click");
         InGameUpgradePanel.SetActive(false);
-        Time.timeScale = 1;
+        Time.timeScale = currentTimeScale;
     }
 }

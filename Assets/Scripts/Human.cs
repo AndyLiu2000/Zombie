@@ -130,9 +130,10 @@ public class Human : MonoBehaviour{
                     InfectionBar.GetComponent<UISlider>().value = (float)(Infection * 1.0f / MaxInfection);
 
                     //解药研发 research
-                    if (Infection  * Battle.CurVirus.Medi_Start / 1000 >= MaxInfection)
+                    Debug.Log("zuobian = " + Infection * 1000 / Battle.CurVirus.Medi_Start + ", youbian = " + MaxInfection);
+                    if (Infection * 1000 / Battle.CurVirus.Medi_Start >= MaxInfection )
                     {
-                        Battle.Medicine += Battle.MEDICINESPD * Battle.CurVirus.Medi_Spd / 1000;
+                        Battle.Medicine += Battle.MEDICINESPD * 1000 / Battle.CurVirus.Medi_Spd;
                     }
                 }
 
@@ -362,7 +363,7 @@ public class Human : MonoBehaviour{
         Destroy(gameObject);
     }
 
-    public void CreatHuman(int curMissionID)
+    public void CreateHuman(int curMissionID)
     {
         //数据初始化
         //Model - DNAUp + Mission
@@ -470,29 +471,7 @@ public class Human : MonoBehaviour{
                 break;
         }
 
-        //Mission值
-        Mission_Sheet mission = new Mission_Sheet();
-        foreach(Mission_Sheet m in DataManager.Mission_Parameter)
-        {
-            if (m.MissionID == curMissionID.ToString())
-            {
-                mission = m;
-                break;
-            }
-        }
-
-        int missionBoost = int.Parse(mission.ClimateBoost) + int.Parse(mission.EnviBoost);
-
-        MaxHP = MaxHP  * (1000 + int.Parse(mission.MaxHPBoost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
-        MaxInfection = MaxInfection * (1000 + int.Parse(mission.InfectionBoost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
-        Atk = Atk * (1000 + int.Parse(mission.Atk_Boost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
-        Heal = Heal * (1000 + int.Parse(mission.Heal_Boost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
-        Def = Def * (1000 + int.Parse(mission.Def_Boost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
-        Cure = Cure * (1000 + int.Parse(mission.Cure_Boost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
-        InfectShield = InfectShield * (1000 + int.Parse(mission.Speed_Boost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
-        InfectionAnti = InfectionAnti * (1000 + int.Parse(mission.InfectionAntiBoost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
-        CommunicationAnti = CommunicationAnti *(1000 + int.Parse(mission.CommunicationAntiBoost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
-        HPHealing = HPHealing * (1000 + int.Parse(mission.HPHealingBoost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
+        UpdateAttributes(curMissionID);
 
         HP = MaxHP;
         Infection = 0;
@@ -515,6 +494,33 @@ public class Human : MonoBehaviour{
                 break;
             }
         }
+    }
+
+    public void UpdateAttributes(int curMissionID)
+    {
+        //Mission值
+        Mission_Sheet mission = new Mission_Sheet();
+        foreach (Mission_Sheet m in DataManager.Mission_Parameter)
+        {
+            if (m.MissionID == curMissionID.ToString())
+            {
+                mission = m;
+                break;
+            }
+        }
+
+        int missionBoost = int.Parse(mission.ClimateBoost) + int.Parse(mission.EnviBoost);
+
+        MaxHP = MaxHP * (1000 + int.Parse(mission.MaxHPBoost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
+        MaxInfection = MaxInfection * (1000 + int.Parse(mission.InfectionBoost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
+        Atk = Atk * (1000 + int.Parse(mission.Atk_Boost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
+        Heal = Heal * (1000 + int.Parse(mission.Heal_Boost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
+        Def = Def * (1000 + int.Parse(mission.Def_Boost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
+        Cure = Cure * (1000 + int.Parse(mission.Cure_Boost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
+        InfectShield = InfectShield * (1000 + int.Parse(mission.Speed_Boost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
+        InfectionAnti = InfectionAnti * (1000 + int.Parse(mission.InfectionAntiBoost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
+        CommunicationAnti = CommunicationAnti * (1000 + int.Parse(mission.CommunicationAntiBoost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
+        HPHealing = HPHealing * (1000 + int.Parse(mission.HPHealingBoost)) / 1000 * (1000 + missionBoost + ClimateBoost + EnviBoost) / 1000;
     }
 
     public Human HumanBattleEvent()

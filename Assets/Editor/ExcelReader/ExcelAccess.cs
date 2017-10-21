@@ -157,7 +157,7 @@ public class ExcelAccess
             Package.FieldName = collect[i][3].ToString();
             Package.EventType = collect[i][4].ToString();
             Package.Value = collect[i][5].ToString();
-            Package.NameID = collect[i][6].ToString();
+            Package.SkillIconName = collect[i][6].ToString();
             Package.DesID = collect[i][7].ToString();
             Package.UpgradeEffectID = collect[i][8].ToString();
 

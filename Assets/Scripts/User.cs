@@ -152,6 +152,11 @@ public class U_DNA
     public int ID;
     public int Lv;
 
+    public U_DNA()
+    {
+
+    }
+
     public U_DNA(int row,List<DNAUp_Sheet> dnaSheet)
     {
         //把每项可升级属性的等级设为1
@@ -167,6 +172,11 @@ public class U_MissionFlag
     public int VirusID;
     public int MissionID;
     public bool Flag;
+
+    public U_MissionFlag()
+    {
+
+    }
 
     public U_MissionFlag(int virusID, int row)
     {

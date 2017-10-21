@@ -281,8 +281,6 @@ public class Formula {
     {
         Battle_C bc = GameObject.Find(GameManager.BATTLE).GetComponent<Battle_C>();
 
-
-
         int fieldValue = 0;
         Type t;
         Type tf;
@@ -334,12 +332,52 @@ public class Formula {
                 Debug.Log("ige.FieldName = " + ige.FieldName);
 
                 t = typeof(Human);
-                tf = t.GetField(ige.FieldName).FieldType;
+                tf = null;
+                if (!ige.FieldName.Contains("ClimateBoost") && !ige.FieldName.Contains("EnviBoost"))
+                    tf = t.GetField(ige.FieldName).FieldType;
 
                 if (ige.TypeParam == "0")
                 {
                     foreach (GameObject h in bc.HumanArray)
                     {
+                        Debug.Log("Clim = " + h.GetComponent<Human>().Clim + ", Envi = " + h.GetComponent<Human>().Envi);
+                        if (ige.FieldName == "ClimateBoost_1" && h.GetComponent<Human>().Clim == Climate.Dry)
+                        {
+                            h.GetComponent<Human>().ClimateBoost *= (1000 + int.Parse(ige.Value)) / 1000;
+                            h.GetComponent<Human>().UpdateAttributes(bc.MissionID);
+                            continue;
+                        }
+                        if (ige.FieldName == "ClimateBoost_2" && h.GetComponent<Human>().Clim == Climate.Wet)
+                        {
+                            h.GetComponent<Human>().ClimateBoost *= (1000 + int.Parse(ige.Value)) / 1000;
+                            h.GetComponent<Human>().UpdateAttributes(bc.MissionID);
+                            continue;
+                        }
+                        if (ige.FieldName == "ClimateBoost_3" && h.GetComponent<Human>().Clim == Climate.Normal)
+                        {
+                            h.GetComponent<Human>().ClimateBoost *= (1000 + int.Parse(ige.Value)) / 1000;
+                            h.GetComponent<Human>().UpdateAttributes(bc.MissionID);
+                            continue;
+                        }
+                        if (ige.FieldName == "EnviBoost_1" && h.GetComponent<Human>().Envi == Environment.Hot)
+                        {
+                            h.GetComponent<Human>().EnviBoost *= (1000 + int.Parse(ige.Value)) / 1000;
+                            h.GetComponent<Human>().UpdateAttributes(bc.MissionID);
+                            continue;
+                        }
+                        if (ige.FieldName == "EnviBoost_2" && h.GetComponent<Human>().Envi == Environment.Cold)
+                        {
+                            h.GetComponent<Human>().EnviBoost *= (1000 + int.Parse(ige.Value)) / 1000;
+                            h.GetComponent<Human>().UpdateAttributes(bc.MissionID);
+                            continue;
+                        }
+                        if (ige.FieldName == "EnviBoost_3" && h.GetComponent<Human>().Envi == Environment.Balance)
+                        {
+                            h.GetComponent<Human>().EnviBoost *= (1000 + int.Parse(ige.Value)) / 1000;
+                            h.GetComponent<Human>().UpdateAttributes(bc.MissionID);
+                            continue;
+                        }
+                        if (tf == null) continue;
                         fieldValue = Convert.ToInt32(t.GetField(ige.FieldName).GetValue(h.GetComponent<Human>()));
                         t.GetField(ige.FieldName).SetValue(h.GetComponent<Human>(), Convert.ChangeType(fieldValue * (1000 + int.Parse(ige.Value)) / 1000, tf));
                     }
@@ -351,6 +389,43 @@ public class Formula {
                     {
                         if (h.GetComponent<Human>().HumanID.ToString() == ige.TypeParam)
                         {
+                            if (ige.FieldName == "ClimateBoost_1" && h.GetComponent<Human>().Clim == Climate.Dry)
+                            {
+                                h.GetComponent<Human>().ClimateBoost *= (1000 + int.Parse(ige.Value)) / 1000;
+                                h.GetComponent<Human>().UpdateAttributes(bc.MissionID);
+                                continue;
+                            }
+                            if (ige.FieldName == "ClimateBoost_2" && h.GetComponent<Human>().Clim == Climate.Wet)
+                            {
+                                h.GetComponent<Human>().ClimateBoost *= (1000 + int.Parse(ige.Value)) / 1000;
+                                h.GetComponent<Human>().UpdateAttributes(bc.MissionID);
+                                continue;
+                            }
+                            if (ige.FieldName == "ClimateBoost_3" && h.GetComponent<Human>().Clim == Climate.Normal)
+                            {
+                                h.GetComponent<Human>().ClimateBoost *= (1000 + int.Parse(ige.Value)) / 1000;
+                                h.GetComponent<Human>().UpdateAttributes(bc.MissionID);
+                                continue;
+                            }
+                            if (ige.FieldName == "EnviBoost_1" && h.GetComponent<Human>().Envi == Environment.Hot)
+                            {
+                                h.GetComponent<Human>().EnviBoost *= (1000 + int.Parse(ige.Value)) / 1000;
+                                h.GetComponent<Human>().UpdateAttributes(bc.MissionID);
+                                continue;
+                            }
+                            if (ige.FieldName == "EnviBoost_2" && h.GetComponent<Human>().Envi == Environment.Cold)
+                            {
+                                h.GetComponent<Human>().EnviBoost *= (1000 + int.Parse(ige.Value)) / 1000;
+                                h.GetComponent<Human>().UpdateAttributes(bc.MissionID);
+                                continue;
+                            }
+                            if (ige.FieldName == "EnviBoost_3" && h.GetComponent<Human>().Envi == Environment.Balance)
+                            {
+                                h.GetComponent<Human>().EnviBoost *= (1000 + int.Parse(ige.Value)) / 1000;
+                                h.GetComponent<Human>().UpdateAttributes(bc.MissionID);
+                                continue;
+                            }
+                            if (tf == null) continue;
                             fieldValue = Convert.ToInt32(t.GetField(ige.FieldName).GetValue(h.GetComponent<Human>()));
                             t.GetField(ige.FieldName).SetValue(h.GetComponent<Human>(), Convert.ChangeType(fieldValue * (1000 + int.Parse(ige.Value)) / 1000, tf));
                             break;
@@ -364,12 +439,51 @@ public class Formula {
                 Debug.Log("ige.FieldName = " + ige.FieldName);
 
                 t = typeof(Zombie);
-                tf = t.GetField(ige.FieldName).FieldType;
+                tf = null;
+                if(!ige.FieldName.Contains("ClimateBoost") && !ige.FieldName.Contains("EnviBoost"))
+                    tf = t.GetField(ige.FieldName).FieldType;
 
                 if (ige.TypeParam == "0")
                 {
                     foreach (GameObject z in bc.ZombieArray)
                     {
+                        if (ige.FieldName == "ClimateBoost_1" && z.GetComponent<Zombie>().Clim == Climate.Dry)
+                        {
+                            z.GetComponent<Zombie>().ClimateBoost *= (1000 + int.Parse(ige.Value)) / 1000;
+                            z.GetComponent<Zombie>().UpdateAttributes();
+                            continue;
+                        }
+                        if (ige.FieldName == "ClimateBoost_2" && z.GetComponent<Zombie>().Clim == Climate.Wet)
+                        {
+                            z.GetComponent<Zombie>().ClimateBoost *= (1000 + int.Parse(ige.Value)) / 1000;
+                            z.GetComponent<Zombie>().UpdateAttributes();
+                            continue;
+                        }
+                        if (ige.FieldName == "ClimateBoost_3" && z.GetComponent<Zombie>().Clim == Climate.Normal)
+                        {
+                            z.GetComponent<Zombie>().ClimateBoost *= (1000 + int.Parse(ige.Value)) / 1000;
+                            z.GetComponent<Zombie>().UpdateAttributes();
+                            continue;
+                        }
+                        if (ige.FieldName == "EnviBoost_1" && z.GetComponent<Zombie>().Envi == Environment.Hot)
+                        {
+                            z.GetComponent<Zombie>().EnviBoost *= (1000 + int.Parse(ige.Value)) / 1000;
+                            z.GetComponent<Zombie>().UpdateAttributes();
+                            continue;
+                        }
+                        if (ige.FieldName == "EnviBoost_2" && z.GetComponent<Zombie>().Envi == Environment.Cold)
+                        {
+                            z.GetComponent<Zombie>().EnviBoost *= (1000 + int.Parse(ige.Value)) / 1000;
+                            z.GetComponent<Zombie>().UpdateAttributes();
+                            continue;
+                        }
+                        if (ige.FieldName == "EnviBoost_3" && z.GetComponent<Zombie>().Envi == Environment.Balance)
+                        {
+                            z.GetComponent<Zombie>().EnviBoost *= (1000 + int.Parse(ige.Value)) / 1000;
+                            z.GetComponent<Zombie>().UpdateAttributes();
+                            continue;
+                        }
+                        if (tf == null) continue;
                         fieldValue = Convert.ToInt32(t.GetField(ige.FieldName).GetValue(z.GetComponent<Zombie>()));
                         t.GetField(ige.FieldName).SetValue(z.GetComponent<Zombie>(), Convert.ChangeType(fieldValue * (1000 + int.Parse(ige.Value)) / 1000, tf));
                     }
@@ -381,6 +495,43 @@ public class Formula {
                     {
                         if (z.GetComponent<Zombie>().ZombieID.ToString() == ige.TypeParam)
                         {
+                            if (ige.FieldName == "ClimateBoost_1" && z.GetComponent<Zombie>().Clim == Climate.Dry)
+                            {
+                                z.GetComponent<Zombie>().ClimateBoost *= (1000 + int.Parse(ige.Value)) / 1000;
+                                z.GetComponent<Zombie>().UpdateAttributes();
+                                continue;
+                            }
+                            if (ige.FieldName == "ClimateBoost_2" && z.GetComponent<Zombie>().Clim == Climate.Wet)
+                            {
+                                z.GetComponent<Zombie>().ClimateBoost *= (1000 + int.Parse(ige.Value)) / 1000;
+                                z.GetComponent<Zombie>().UpdateAttributes();
+                                continue;
+                            }
+                            if (ige.FieldName == "ClimateBoost_3" && z.GetComponent<Zombie>().Clim == Climate.Normal)
+                            {
+                                z.GetComponent<Zombie>().ClimateBoost *= (1000 + int.Parse(ige.Value)) / 1000;
+                                z.GetComponent<Zombie>().UpdateAttributes();
+                                continue;
+                            }
+                            if (ige.FieldName == "EnviBoost_1" && z.GetComponent<Zombie>().Envi == Environment.Hot)
+                            {
+                                z.GetComponent<Zombie>().EnviBoost *= (1000 + int.Parse(ige.Value)) / 1000;
+                                z.GetComponent<Zombie>().UpdateAttributes();
+                                continue;
+                            }
+                            if (ige.FieldName == "EnviBoost_2" && z.GetComponent<Zombie>().Envi == Environment.Cold)
+                            {
+                                z.GetComponent<Zombie>().EnviBoost *= (1000 + int.Parse(ige.Value)) / 1000;
+                                z.GetComponent<Zombie>().UpdateAttributes();
+                                continue;
+                            }
+                            if (ige.FieldName == "EnviBoost_3" && z.GetComponent<Zombie>().Envi == Environment.Balance)
+                            {
+                                z.GetComponent<Zombie>().EnviBoost *= (1000 + int.Parse(ige.Value)) / 1000;
+                                z.GetComponent<Zombie>().UpdateAttributes();
+                                break;
+                            }
+                            if (tf == null) continue;
                             fieldValue = Convert.ToInt32(t.GetField(ige.FieldName).GetValue(z.GetComponent<Zombie>()));
                             t.GetField(ige.FieldName).SetValue(z.GetComponent<Zombie>(), Convert.ChangeType(fieldValue * (1000 + int.Parse(ige.Value)) / 1000, tf));
                             break;
