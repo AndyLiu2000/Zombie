@@ -2,10 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class Zombie : MonoBehaviour{
 
     private float ATTACK_INTERVAL = 5.0f;
     private float HEALTH_INTERVAL = 5.0f;
+    const int MAX_UPDATE_INTERVAL = 6;
+    const int UPDATE_INDEX_SELF = 0;
+    const int UPDATE_INDEX_DATA = 1;
+    const int UPDATE_INDEX_SKILL = 2;
+    const int UPDATE_INDEX_MEDICINE = 3;
+    const int UPDATE_INDEX_MODE = 4;
+    const int UPDATE_INDEX_TIMING = 5;
+    int updateInterval = 0;
 
     //Model：丧尸
     public float ZombieID;
@@ -42,6 +51,8 @@ public class Zombie : MonoBehaviour{
     public UISprite EnviIcon;
     public UISprite SkillIcon;
     Battle_C Battle;
+    public GameObject skillSEGO;
+    public GameObject dieSEGO;
 
     //环境变量
     float healDeltaTime = 0;
@@ -64,64 +75,91 @@ public class Zombie : MonoBehaviour{
 
         if (GameManager.BC.BattleState == BattleState.Game)
         {
-            healDeltaTime += Time.fixedDeltaTime;
-            skillDeltaTime += Time.fixedDeltaTime;
-
-            //失血
-            if (healDeltaTime >= HEALTH_INTERVAL)
+            updateInterval++;
+            if(updateInterval == UPDATE_INDEX_SELF)
             {
-                self.HP -= HPDecay;
-                HPBar.GetComponent<UISlider>().value = (float)(HP * 1.0f / MaxHP);
-            }
-
-            //丧尸死亡
-            if (self.HP <= 0)
-            {
-                ZombieDie();
-            }
-
-            //每5秒攻击一次
-            if (skillDeltaTime >= ATTACK_INTERVAL) // 暂时不攻击 don't attack temporarily
-            {
-                switch (SkillID)
+                healDeltaTime += Time.fixedDeltaTime * MAX_UPDATE_INTERVAL;
+                //失血
+                if (healDeltaTime >= HEALTH_INTERVAL)
                 {
-                    case "100":   //随机单体攻击
-                        RandomSingleAttack();
-                        break;
-                    case "200":   //随机群体攻击
-                        RandomSingleAttack();
-                        RandomSingleAttack();
-                        RandomSingleAttack();
-                        break;
-                    case "300":   //随机单体治疗
-                        RandomSingleHeal();
-                        break;
-                    case "400":   //随机三目标治疗
-                        RandomSingleHeal();
-                        RandomSingleHeal();
-                        RandomSingleHeal();
-                        break;
-                    case "500":   //随机单体攻击和增加感染度
-                        RandomSingle_AttackInfect();
-                        break;
-                    case "600":   //随机群体攻击和增加感染度
-                        RandomSingle_AttackInfect();
-                        RandomSingle_AttackInfect();
-                        RandomSingle_AttackInfect();
-                        break;
+                    self.HP -= HPDecay;
+                    HPBar.GetComponent<UISlider>().value = (float)(HP * 1.0f / MaxHP);
+                }
+
+                //丧尸死亡
+                if (self.HP <= 0)
+                {
+                    ZombieDie();
+                }
+
+                //按秒执行操作
+                if (healDeltaTime >= HEALTH_INTERVAL)
+                {
+                    healDeltaTime = 0.0f;
                 }
             }
 
-            //按秒执行操作
-            if (healDeltaTime >= HEALTH_INTERVAL)
+            if(updateInterval == UPDATE_INDEX_DATA)
             {
-                healDeltaTime = 0.0f;
+
             }
 
-            if (skillDeltaTime >= ATTACK_INTERVAL)
+            if(updateInterval == UPDATE_INDEX_SKILL)
             {
-                skillDeltaTime = 0.0f;
+                skillDeltaTime += Time.fixedDeltaTime * MAX_UPDATE_INTERVAL;
+                //每5秒攻击一次
+                if (skillDeltaTime >= ATTACK_INTERVAL) // 暂时不攻击 don't attack temporarily
+                {
+                    switch (SkillID)
+                    {
+                        case "100":   //随机单体攻击
+                            RandomSingleAttack();
+                            break;
+                        case "200":   //随机群体攻击
+                            RandomSingleAttack();
+                            RandomSingleAttack();
+                            RandomSingleAttack();
+                            break;
+                        case "300":   //随机单体治疗
+                            RandomSingleHeal();
+                            break;
+                        case "400":   //随机三目标治疗
+                            RandomSingleHeal();
+                            RandomSingleHeal();
+                            RandomSingleHeal();
+                            break;
+                        case "500":   //随机单体攻击和增加感染度
+                            RandomSingle_AttackInfect();
+                            break;
+                        case "600":   //随机群体攻击和增加感染度
+                            RandomSingle_AttackInfect();
+                            RandomSingle_AttackInfect();
+                            RandomSingle_AttackInfect();
+                            break;
+                    }
+                }
+
+                if (skillDeltaTime >= ATTACK_INTERVAL)
+                {
+                    skillDeltaTime = 0.0f;
+                }
             }
+
+            if(updateInterval == UPDATE_INDEX_MEDICINE)
+            {
+
+            }
+
+            if(updateInterval == UPDATE_INDEX_MODE)
+            {
+
+            }
+
+            if(updateInterval == UPDATE_INDEX_TIMING)
+            {
+                updateInterval = UPDATE_INDEX_SELF;
+            }
+            
         }
 
         if (GameManager.BC.BattleState == BattleState.End)
@@ -147,33 +185,31 @@ public class Zombie : MonoBehaviour{
                 HP += deltaHumanHP * DrainLife / 1000;  //丧尸吸血
                 if (HP > MaxHP)
                     HP = MaxHP;
-                GenerateSEInGameobjectPosition(human, "Skill_Behit_H", true, null);
+                GenerateSEInGameobjectPosition(human, SEType.Skill, true, null);
             }
         }
     }
 
-    void GenerateDestroySE()
+    void GenerateSEInGameobjectPosition(GameObject go, SEType seType, bool isSelfActive, string invokeName)
     {
-        GameObject skillBullet = NGUITools.AddChild(GameManager.BC.Entity, (GameObject)(Resources.Load("SEPrefabs/Skill_Behit_H")));
-        skillBullet.transform.localScale = new Vector3(80, 80, 1);        //该死的Unity，把动画文件加载的时候默认缩小为1/100了，所以这里要扩大100倍。注意，改Prefabs的缩放比例是没用的
-        NGUITools.SetDirty(GameManager.BC.Entity);
-        Transform z = gameObject.GetComponent<Transform>();
-        skillBullet.transform.localPosition = z.localPosition;
-
-        gameObject.SetActive(false);
-        Invoke("ZombieDie", skillBullet.GetComponent<Animator>().runtimeAnimatorController.animationClips[0].length);
-        Destroy(skillBullet, skillBullet.GetComponent<Animator>().runtimeAnimatorController.animationClips[0].length);
-    }
-
-    void GenerateSEInGameobjectPosition(GameObject go, string seName, bool isSelfActive, string invokeName)
-    {
-        GameObject se = NGUITools.AddChild(GameManager.BC.Entity, (GameObject)(Resources.Load("SEPrefabs" + "/" + seName)));
+        //GameObject se = NGUITools.AddChild(GameManager.BC.Entity, (GameObject)(Resources.Load("SEPrefabs" + "/" + seName)));
+        GameObject se = null;
+        switch (seType)
+        {
+            case SEType.Skill:
+                se = NGUITools.AddChild(GameManager.BC.Entity, skillSEGO);
+                break;
+            case SEType.Die:
+                se = NGUITools.AddChild(GameManager.BC.Entity, dieSEGO);
+                break;
+        }
         se.transform.localScale = new Vector3(80, 80, 1);        //该死的Unity，把动画文件加载的时候默认缩小为1/100了，所以这里要扩大100倍。注意，改Prefabs的缩放比例是没用的
         NGUITools.SetDirty(GameManager.BC.Entity);
         Transform desGO = go.GetComponent<Transform>();
         se.transform.localPosition = desGO.localPosition;
 
-        go.SetActive(isSelfActive);
+        //go.SetActive(isSelfActive);
+        Formula.Btn_IsVisible(go, isSelfActive);
         if (invokeName != null)
             Invoke(invokeName, se.GetComponent<Animator>().runtimeAnimatorController.animationClips[0].length);
 
@@ -191,7 +227,7 @@ public class Zombie : MonoBehaviour{
             if (aZombie.HP >= aZombie.MaxHP)
                 aZombie.HP = aZombie.MaxHP;
 
-            GenerateSEInGameobjectPosition(zombie, "Skill_Heal_Z", true, null);
+            GenerateSEInGameobjectPosition(zombie, SEType.Skill, true, null);
         }
     }
 
@@ -210,13 +246,13 @@ public class Zombie : MonoBehaviour{
             if (aHuman.Infection >= aHuman.MaxInfection)
                 aHuman.Infection = aHuman.MaxInfection;
 
-            GenerateSEInGameobjectPosition(human, "Skill_BehitInfect_H", true, null);
+            GenerateSEInGameobjectPosition(human, SEType.Skill, true, null);
         }
     }
 
     void ZombieDie()
     {
-        GenerateSEInGameobjectPosition(gameObject, "ZombieDie", false, "ZombieVanish");
+        GenerateSEInGameobjectPosition(gameObject, SEType.Die, false, "ZombieVanish");
     }
 
     void ZombieVanish()
@@ -336,9 +372,13 @@ public class Zombie : MonoBehaviour{
             {
                 SkillIcon.spriteName = sas.ResIcon;
                 param = int.Parse(sas.Value1) + int.Parse(sas.Value1_Add);
+                //特效预加载
+                skillSEGO = (GameObject)(Resources.Load("SEPrefabs" + "/" + sas.SEName));
+                dieSEGO = (GameObject)(Resources.Load("SEPrefabs" + "/" + "ZombieDie"));
                 break;
             }
-        }        
+        }
+        
     }
 
     public void UpdateAttributes()

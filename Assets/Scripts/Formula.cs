@@ -4,6 +4,33 @@ using UnityEngine;
 using System;
 
 public class Formula {
+
+    //界面跳出的表现方法
+
+    public static void UI_IsVisible(GameObject ui, bool isVisible)
+    {
+        if (isVisible)
+        {
+            ui.transform.localPosition = new Vector3(0, 0);
+        }
+        else
+        {
+            ui.transform.localPosition = new Vector3(10000, 10000);
+        }
+    }
+
+    public static void Btn_IsVisible(GameObject btn, bool isVisible)
+    {
+        if (isVisible)
+        {
+            btn.transform.localScale = new Vector3(1, 1);
+        }
+        else
+        {
+            btn.transform.localScale = new Vector3(0, 0);
+        }
+    }
+
     //属性计算
     //DNAUP属性计算
     public static int FieldNameToValue(string fieldName, List<DNAUp_Sheet> dnaSheet, List<U_DNA> useData)

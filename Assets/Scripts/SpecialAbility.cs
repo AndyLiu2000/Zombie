@@ -22,4 +22,5 @@ public class SpecialAbility_Sheet
     public string Value3;
     public string Value3_Add;
     public string DesTextID;
+    public string SEName;
 }

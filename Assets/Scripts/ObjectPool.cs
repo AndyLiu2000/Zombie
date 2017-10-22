@@ -25,7 +25,8 @@ public class ObjectPool<T1,T2> where T1:class, new()
         {
             // an allocated object is already available; just reset it
             T1 t = ObjectList[nextAvailableIndex];
-            (t as GameObject).SetActive(true);
+            //(t as GameObject).SetActive(true);
+            Formula.Btn_IsVisible(t as GameObject, true);
             nextAvailableIndex++;
 
             if (ResetAction != null)

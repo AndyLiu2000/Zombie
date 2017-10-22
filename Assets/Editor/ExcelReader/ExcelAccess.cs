@@ -404,6 +404,7 @@ public class ExcelAccess
             Ability.Value3 = collect[i][7].ToString();
             Ability.Value3_Add = collect[i][8].ToString();
             Ability.DesTextID = collect[i][9].ToString();
+            Ability.SEName = collect[i][10].ToString();
 
             array.Add(Ability);
         }

@@ -122,12 +122,12 @@ public class GameManager :MonoBehaviour {
         {
             //DontDestroyOnLoad(UIS[ui]);
             //UIS[ui].SetActive(false);
-            UI_IsVisible(UIS[ui], false);
+            Formula.UI_IsVisible(UIS[ui], false);
         }
 
         //初始化第一个界面
         //UIS[LOGIN].SetActive(true);
-        UI_IsVisible(UIS[LOGIN], true);
+        Formula.UI_IsVisible(UIS[LOGIN], true);
         UIS[LOGIN].GetComponent<Login_C>().enter();
     }
 
@@ -139,7 +139,7 @@ public class GameManager :MonoBehaviour {
     public static void ChangePanel(GameObject oriUI,GameObject desUI,int param1)
     {
         //desUI.SetActive(true);
-        UI_IsVisible(desUI,true);
+        Formula.UI_IsVisible(desUI,true);
 
         //预加载数据
         if (desUI == UIS[MAIN])
@@ -189,26 +189,12 @@ public class GameManager :MonoBehaviour {
         if (oriUI)
         {
            //oriUI.SetActive(false);
-           UI_IsVisible(oriUI, false);
+           Formula.UI_IsVisible(oriUI, false);
         }
 
     }
 
-    //界面跳出的表现方法
-
-    public static void UI_IsVisible(GameObject ui,bool isVisible)
-    {
-        if (isVisible)
-        {
-            ui.transform.localPosition = new Vector3(0, 0);
-        }
-        else
-        {
-            ui.transform.localPosition = new Vector3(10000, 10000);
-        }
-            
-        
-    }
+    
 
     //界面转入的表现方法
 	

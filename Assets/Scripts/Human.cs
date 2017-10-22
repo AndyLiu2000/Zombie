@@ -3,6 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum SEType
+{
+    Skill,
+    Die
+}
+
 public class Human : MonoBehaviour{
 
     const int KILL_HUMAN_SP = 5;
@@ -13,6 +19,14 @@ public class Human : MonoBehaviour{
     const float INFECT_INTERVAL = 1.0f;
     const float COMMUNICATE_INTERVAL = 2.0f;
     const float ATTACK_INTERVAL = 5.0f;
+    const int MAX_UPDATE_INTERVAL = 6;
+    const int UPDATE_INDEX_SELF = 0;
+    const int UPDATE_INDEX_DATA = 1;
+    const int UPDATE_INDEX_SKILL = 2;
+    const int UPDATE_INDEX_MEDICINE = 3;
+    const int UPDATE_INDEX_MODE = 4;
+    const int UPDATE_INDEX_TIMING = 5;
+    int updateInterval = 0;
 
     //Model：Human
     public int HumanID;
@@ -55,6 +69,8 @@ public class Human : MonoBehaviour{
     public UISprite SkillIcon;
     public GameObject StartBubble;
     IEnumerator DestroySEParam;
+    public GameObject skillSEGO;
+    public GameObject dieSEGO;
 
     //环境变量
     Battle_C Battle;
@@ -88,164 +104,178 @@ public class Human : MonoBehaviour{
 
         if (Battle.BattleState == BattleState.Game)
         {
-            healDeltaTime += Time.fixedDeltaTime;
-            infectDeltaTime += Time.fixedDeltaTime;
-            communicateDeltaTime += Time.fixedDeltaTime;
-            skillDeltaTime += Time.fixedDeltaTime;
-
-            //回血 restore
-            if (self.HP < self.MaxHP)
+            updateInterval++;
+            if(updateInterval == UPDATE_INDEX_SELF)
             {
-                if (healDeltaTime >= HEAL_INTERVAL)
+                healDeltaTime += Time.fixedDeltaTime * MAX_UPDATE_INTERVAL;
+
+                //回血 restore
+                if (self.HP < self.MaxHP)
                 {
-                    self.HP += HPHealing;
+                    if (healDeltaTime >= HEAL_INTERVAL)
+                    {
+                        self.HP += HPHealing;
+                        healDeltaTime = 0.0f;
+                    }
+                }
+
+                //人类死亡 human die
+                if (self.HP <= 0)
+                {
+                    Battle.ZombieKillNum += 1;
+                    HumanDie();
                 }
             }
 
-            //人类死亡 human die
-            if (self.HP <= 0)
+            if (updateInterval == UPDATE_INDEX_DATA)
             {
-                Battle.ZombieKillNum += 1;
-                HumanDie();
-            }
+                infectDeltaTime += Time.fixedDeltaTime * MAX_UPDATE_INTERVAL;
+                communicateDeltaTime += Time.fixedDeltaTime * MAX_UPDATE_INTERVAL;
 
-            //解药相关 medicine
-            if (Battle.medicineOK == true)
-            {
-                self.Infected = false;
-            }
+                //感染 infect
+                if (self.Infected)
+                {
+                    if (infectDeltaTime >= INFECT_INTERVAL)
+                    {
+                        //感染加深
+                        int infect = Battle.CurVirus.InfectSpeed
+                            * (1000 + Battle.CurVirus.InfectHumans[HumanID - 1]) / 1000
+                            * (1000 + Battle.CurVirus.InfectClims[(int)Clim]) / 1000
+                            * (1000 + Battle.CurVirus.InfectEnvis[(int)Envi]) / 1000
+                            - InfectionAnti;
+                        Infection += infect > 0 ? infect : 0;
+                        InfectionBar.GetComponent<UISlider>().value = (float)(Infection * 1.0f / MaxInfection);
 
-            //感染 infect
-            if (self.Infected)
-            {
+                        //解药研发 research
+                        //Debug.Log("zuobian = " + Infection * 1000 / Battle.CurVirus.Medi_Start + ", youbian = " + MaxInfection);
+                        if (Infection * 1000 / Battle.CurVirus.Medi_Start >= MaxInfection)
+                        {
+                            Battle.Medicine += Battle.MEDICINESPD * 1000 / Battle.CurVirus.Medi_Spd;
+                        }
+                    }
+
+                    //感染度为满，人类死亡，变成丧尸 if infection exceeds maxinfection, then human dies and turns into zombie
+                    if (Infection >= MaxInfection)
+                    {
+                        Battle.InfectKillNum += 1;
+
+                        HumanDie();
+
+                        //后面的代码全部不再执行
+                        //return;
+                    }
+
+                    //传染，大于临界值才开始传染
+                    if (MaxInfection <= Battle.CurVirus.CommunicationThreshold * Infection)
+                    {
+                        //Battle.CurVirus.CommunicateRate用在这里，缩短传染的时间间隔
+                        if (communicateDeltaTime >= COMMUNICATE_INTERVAL * 1000 / (1000 + Battle.CurVirus.CommunicateRate))
+                        {
+                            List<GameObject> unInfectedHumans = new List<GameObject>();
+                            foreach (GameObject h in Battle.HumanArray)
+                            {
+                                if (h.GetComponent<Human>().Infected == false)
+                                {
+                                    //取得所有未感染的人类
+                                    unInfectedHumans.Add(h);
+                                }
+                            }
+
+                            if (unInfectedHumans.Count > 0)
+                            {
+                                Debug.Log("找随机目标传染一次");
+                                GameObject unInfectedHuman = Formula.ListRandomElement(unInfectedHumans);
+                                int random = UnityEngine.Random.Range(0, 1000);
+                                int c = CommunicationAnti
+                                    * (1000 + Battle.CurVirus.CommunicateHumans[HumanID - 1]) / 1000
+                                    * (1000 + Battle.CurVirus.CommunicateClimates[(int)Clim]) / 1000
+                                    * (1000 + Battle.CurVirus.CommunicateEnvis[(int)Envi]) / 1000;
+                                //Debug.Log("random = " + random + ", c = " + c);
+                                //随机数大于抗传染概率时，才成功传染
+                                if (random > CommunicationAnti
+                                    * (1000 + Battle.CurVirus.CommunicateHumans[HumanID - 1]) / 1000
+                                    * (1000 + Battle.CurVirus.CommunicateClimates[(int)Clim]) / 1000
+                                    * (1000 + Battle.CurVirus.CommunicateEnvis[(int)Envi]) / 1000)
+                                {
+                                    unInfectedHuman.GetComponent<Human>().InfectShield -= Battle.CurVirus.InfectSpeed;
+                                    if (unInfectedHuman.GetComponent<Human>().InfectShield < 0)
+                                    {
+                                        unInfectedHuman.GetComponent<Human>().InfectShield = 0;
+                                        unInfectedHuman.GetComponent<Human>().Infected = true;
+                                        Debug.Log("传染一个新人类");
+                                        Battle.InfectNum += 1;
+                                        Battle.SP_Add(INFECT_HUMAN_SP, Battle.StrategyBtn, Battle.LabelStrategy, false);
+                                    }
+                                    Debug.Log("InfectShield = " + unInfectedHuman.GetComponent<Human>().InfectShield);
+                                }
+
+                            }
+
+                        }
+                    }
+                }
+                //按秒执行操作
                 if (infectDeltaTime >= INFECT_INTERVAL)
                 {
-                    //感染加深
-                    int infect = Battle.CurVirus.InfectSpeed
-                        * (1000+Battle.CurVirus.InfectHumans[HumanID - 1]) /1000
-                        * (1000+Battle.CurVirus.InfectClims[(int)Clim]) / 1000
-                        * (1000+Battle.CurVirus.InfectEnvis[(int)Envi]) /1000
-                        - InfectionAnti;
-                    Infection += infect > 0 ? infect : 0;
-                    InfectionBar.GetComponent<UISlider>().value = (float)(Infection * 1.0f / MaxInfection);
+                    infectDeltaTime = 0.0f;
+                }
 
-                    //解药研发 research
-                    Debug.Log("zuobian = " + Infection * 1000 / Battle.CurVirus.Medi_Start + ", youbian = " + MaxInfection);
-                    if (Infection * 1000 / Battle.CurVirus.Medi_Start >= MaxInfection )
+                if (communicateDeltaTime >= COMMUNICATE_INTERVAL * 1000 / (1000 + Battle.CurVirus.CommunicateRate))
+                {
+                    communicateDeltaTime = 0.0f;
+                }
+            }
+
+            if (updateInterval == UPDATE_INDEX_SKILL)
+            {
+                skillDeltaTime += Time.fixedDeltaTime * MAX_UPDATE_INTERVAL;
+                //每5秒使用一次技能 cast skill every 5 seconds
+                if (skillDeltaTime >= ATTACK_INTERVAL)
+                {
+                    switch (SkillID)
                     {
-                        Battle.Medicine += Battle.MEDICINESPD * 1000 / Battle.CurVirus.Medi_Spd;
+                        case "1":   //随机单体攻击
+                            RandomSingleAttack();
+                            break;
+                        case "2":   //治愈自身感染度
+                            CureSelfInfection();
+                            break;
+                        case "3":   //随机单体治疗
+                            RandomSingleHeal();
+                            break;
+                        case "4":   //随机三目标治疗
+                            RandomSingleHeal();
+                            RandomSingleHeal();
+                            RandomSingleHeal();
+                            break;
+                        case "5":   //随机群体治疗生命值和感染度
+                            RandomSingle_HealCure();
+                            break;
                     }
-                }
 
-                //感染度为满，人类死亡，变成丧尸 if infection exceeds maxinfection, then human dies and turns into zombie
-                if (Infection >= MaxInfection)
+                    skillDeltaTime = 0.0f;
+                }
+            }
+
+            if (updateInterval == UPDATE_INDEX_MEDICINE)
+            {
+                //解药相关 medicine
+                if (Battle.medicineOK == true)
                 {
-                    Battle.InfectKillNum += 1;
-
-                    HumanDie();
-
-                    //后面的代码全部不再执行
-                    //return;
+                    self.Infected = false;
                 }
-
-                //传染，大于临界值才开始传染
-                if (MaxInfection <= Battle.CurVirus.CommunicationThreshold * Infection)
-                {
-                    //Battle.CurVirus.CommunicateRate用在这里，缩短传染的时间间隔
-                    if (communicateDeltaTime >= COMMUNICATE_INTERVAL * 1000 / (1000 + Battle.CurVirus.CommunicateRate))
-                    {
-                        List<GameObject> unInfectedHumans = new List<GameObject>();
-                        foreach (GameObject h in Battle.HumanArray)
-                        {
-                            if (h.GetComponent<Human>().Infected == false)
-                            {
-                                //取得所有未感染的人类
-                                unInfectedHumans.Add(h);
-                            }
-                        }
-                        
-                        if (unInfectedHumans.Count > 0)
-                        {
-                            Debug.Log("找随机目标传染一次");
-                            GameObject unInfectedHuman = Formula.ListRandomElement(unInfectedHumans);
-                            int random = UnityEngine.Random.Range(0, 1000);
-                            int c = CommunicationAnti
-                                * (1000 + Battle.CurVirus.CommunicateHumans[HumanID - 1]) / 1000
-                                * (1000 + Battle.CurVirus.CommunicateClimates[(int)Clim]) / 1000
-                                * (1000 + Battle.CurVirus.CommunicateEnvis[(int)Envi]) / 1000;
-                            Debug.Log("random = " + random + ", c = " + c);
-                            //随机数大于抗传染概率时，才成功传染
-                            if (random > CommunicationAnti
-                                * (1000 + Battle.CurVirus.CommunicateHumans[HumanID - 1]) / 1000
-                                * (1000 + Battle.CurVirus.CommunicateClimates[(int)Clim]) / 1000
-                                * (1000 + Battle.CurVirus.CommunicateEnvis[(int)Envi]) / 1000)
-                            {
-                                unInfectedHuman.GetComponent<Human>().InfectShield -= Battle.CurVirus.InfectSpeed;
-                                if (unInfectedHuman.GetComponent<Human>().InfectShield < 0)
-                                {
-                                    unInfectedHuman.GetComponent<Human>().InfectShield = 0;
-                                    unInfectedHuman.GetComponent<Human>().Infected = true;
-                                    Debug.Log("传染一个新人类");
-                                    Battle.InfectNum += 1;
-                                    Battle.SP_Add(INFECT_HUMAN_SP, Battle.StrategyBtn, Battle.LabelStrategy, false);
-                                }
-                                Debug.Log("InfectShield = " + unInfectedHuman.GetComponent<Human>().InfectShield);
-                            }
-                            
-                        }
-                        
-                    }
-                }
-                
             }
 
-            //每5秒使用一次技能 cast skill every 5 seconds
-            if (skillDeltaTime >= ATTACK_INTERVAL)
+            if (updateInterval == UPDATE_INDEX_MODE)
             {
-                switch (SkillID)
-                {
-                    case "1":   //随机单体攻击
-                        RandomSingleAttack();
-                        break;
-                    case "2":   //治愈自身感染度
-                        CureSelfInfection();
-                        break;
-                    case "3":   //随机单体治疗
-                        RandomSingleHeal();
-                        break;
-                    case "4":   //随机三目标治疗
-                        RandomSingleHeal();
-                        RandomSingleHeal();
-                        RandomSingleHeal();
-                        break;
-                    case "5":   //随机群体治疗生命值和感染度
-                        RandomSingle_HealCure();
-                        break;
-                }
-                
+
             }
 
-            if (skillDeltaTime >= ATTACK_INTERVAL)
+            if (updateInterval == UPDATE_INDEX_TIMING)
             {
-                skillDeltaTime = 0.0f;
+                updateInterval = UPDATE_INDEX_SELF;
             }
-
-            //按秒执行操作
-            if (healDeltaTime >= HEAL_INTERVAL)
-            {
-                healDeltaTime = 0.0f;
-            }
-
-            //按秒执行操作
-            if (infectDeltaTime >= INFECT_INTERVAL)
-            {
-                infectDeltaTime = 0.0f;
-            }
-
-            if (communicateDeltaTime >= COMMUNICATE_INTERVAL * 1000 / (1000 + Battle.CurVirus.CommunicateRate))
-            {
-                communicateDeltaTime = 0.0f;
-            }
+            
         }
 
         if (Battle.BattleState == BattleState.End)
@@ -263,20 +293,17 @@ public class Human : MonoBehaviour{
             GameObject zombie = Formula.ArrayListRandomElement(Battle.ZombieArray) as GameObject;
             Zombie aZombie = zombie.GetComponent<Zombie>();
 
-            Debug.Log("Atk = " + Atk);
-            Debug.Log("param = " + param);
-            Debug.Log("aZombie.Def = " + aZombie.Def);
             if (Atk * param / 1000 >= aZombie.Def)
             {
                 aZombie.HP -= (int)(Atk * param / 1000 - aZombie.Def);
-                GenerateSEInGameobjectPosition(zombie, "Skill_Behit_Z", true, null);
+                GenerateSEInGameobjectPosition(zombie, SEType.Skill, true, null);
             }
         }
     }
 
     void HumanDie()
     {
-        GenerateSEInGameobjectPosition(gameObject, "HumanDie", false, "GenerateZombie");
+        GenerateSEInGameobjectPosition(gameObject, SEType.Die, false, "GenerateZombie");
     }
 
     void CureSelfInfection()
@@ -287,19 +314,29 @@ public class Human : MonoBehaviour{
         if (Infection <= 0)
             Infection = 0;
 
-        GenerateSEInGameobjectPosition(gameObject, "Skill_Cure_H", true, null);
+        GenerateSEInGameobjectPosition(gameObject, SEType.Skill, true, null);
     }
 
-    void GenerateSEInGameobjectPosition(GameObject go, string seName, bool isSelfActive,string invokeName)
+    void GenerateSEInGameobjectPosition(GameObject go, SEType seType, bool isSelfActive,string invokeName)
     {
-        //Debug.Log("seName = " + seName);
-        GameObject se = NGUITools.AddChild(GameManager.BC.Entity, (GameObject)(Resources.Load("SEPrefabs" + "/" + seName)));
+        //GameObject se = NGUITools.AddChild(GameManager.BC.Entity, (GameObject)(Resources.Load("SEPrefabs" + "/" + seName)));
+        GameObject se = null;
+        switch (seType)
+        {
+            case SEType.Skill:
+                se = NGUITools.AddChild(GameManager.BC.Entity, skillSEGO);
+                break;
+            case SEType.Die:
+                se = NGUITools.AddChild(GameManager.BC.Entity, dieSEGO);
+                break;
+        }
         se.transform.localScale = new Vector3(80, 80, 1);        //该死的Unity，把动画文件加载的时候默认缩小为1/100了，所以这里要扩大100倍。注意，改Prefabs的缩放比例是没用的
         NGUITools.SetDirty(GameManager.BC.Entity);
         Transform desGO = go.GetComponent<Transform>();
         se.transform.localPosition = desGO.localPosition;
 
-        go.SetActive(isSelfActive);
+        //go.SetActive(isSelfActive);
+        Formula.Btn_IsVisible(go, isSelfActive);
         if (invokeName != null)
             Invoke(invokeName, se.GetComponent<Animator>().runtimeAnimatorController.animationClips[0].length);
 
@@ -317,7 +354,7 @@ public class Human : MonoBehaviour{
             if (aHuman.HP >= aHuman.MaxHP)
                 aHuman.HP = aHuman.MaxHP;
 
-            GenerateSEInGameobjectPosition(human, "Skill_Heal_H", true, null);
+            GenerateSEInGameobjectPosition(human, SEType.Skill, true, null);
         }
     }
 
@@ -337,7 +374,7 @@ public class Human : MonoBehaviour{
             if (aHuman.Infection <= 0)
                 aHuman.Infection = 0;
 
-            GenerateSEInGameobjectPosition(human, "Skill_HealCure_H", true, null);
+            GenerateSEInGameobjectPosition(human, SEType.Skill, true, null);
         }
     }
 
@@ -491,6 +528,9 @@ public class Human : MonoBehaviour{
             {
                 SkillIcon.spriteName = sas.ResIcon;
                 param = int.Parse(sas.Value1) + int.Parse(sas.Value1_Add);
+                //特效预加载
+                skillSEGO = (GameObject)(Resources.Load("SEPrefabs" + "/" + sas.SEName));
+                dieSEGO = (GameObject)(Resources.Load("SEPrefabs" + "/" + "HumanDie"));
                 break;
             }
         }

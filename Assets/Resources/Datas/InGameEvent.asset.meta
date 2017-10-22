@@ -1,8 +1,9 @@
 fileFormatVersion: 2
 guid: d5858ec306ee56d4784995a96f0ca367
-timeCreated: 1508368456
+timeCreated: 1508646502
 licenseType: Free
 NativeFormatImporter:
+  externalObjects: {}
   mainObjectFileID: 11400000
   userData: 
   assetBundleName: ingameevent

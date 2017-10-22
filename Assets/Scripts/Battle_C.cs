@@ -41,12 +41,20 @@ public class Battle_C : MonoBehaviour {
     const int VIRUSNUM = 2;
     const int MEDICINEWORK = 50000;
     public int MEDICINESPD = 10;
+    const int MAX_UPDATE_INTERVAL = 6;
+    const int UPDATE_INDEX_GAMING = 0;
+    const int UPDATE_INDEX_DATA = 1;
+    const int UPDATE_INDEX_SKILL = 2;
+    const int UPDATE_INDEX_MEDICINE = 3;
+    const int UPDATE_INDEX_MODE = 4;
+    const int UPDATE_INDEX_TIMING = 5;
+    int updateInterval = 0;
 
     //关卡数据
     public int MissionID;
     public int VirusID;
     Modes mode;
-    float deltaTime = 0;
+    //float deltaTime = 0;
     float deltaTime2 = 0;
     float deltaTime3 = 0;
     float currentTimeScale = 1.0f;
@@ -147,10 +155,14 @@ public class Battle_C : MonoBehaviour {
     //接收不同模式的数据，方便以后独立处理，Enter结束之后才开始Update. init mode data
     public void Enter(int curVirusID, int curMissionID,Modes curMode)
     {
-        EndBattleBtn.SetActive(false);
-        InGameUpgradePanel.SetActive(false);
-        StrategyBtn.SetActive(true);
-        SpeedBtn.SetActive(true);
+        //EndBattleBtn.SetActive(false);
+        //InGameUpgradePanel.SetActive(false);
+        //StrategyBtn.SetActive(true);
+        //SpeedBtn.SetActive(true);
+        Formula.Btn_IsVisible(EndBattleBtn, false);
+        Formula.Btn_IsVisible(InGameUpgradePanel, false);
+        Formula.Btn_IsVisible(StrategyBtn, true);
+        Formula.Btn_IsVisible(SpeedBtn, true);
         Accelarate = false;
         LabelSpeed.text = "X 1";
 
@@ -188,6 +200,11 @@ public class Battle_C : MonoBehaviour {
 
         //LoadBattleEvent(MissionID);
         //LoadBattleStrategy("1");
+        MedicineBar.GetComponent<UISlider>().value = BC.Medicine * 1.0f / BC.MedicineWork;
+
+        LabelStrategyPoint.GetComponent<UILabel>().text = BC.StrategyPoint.ToString();
+
+        Timer.text = "";
 
         BattleState = BattleState.Start;
     }
@@ -201,6 +218,8 @@ public class Battle_C : MonoBehaviour {
         //随机生成人类数据，矩阵排布，临时方案 temporary resolution. line all humans in matrix
         int row = int.Parse(DataManager.Mission_Parameter[MissionID].DistributionParam1);
         int column = int.Parse(DataManager.Mission_Parameter[MissionID].DistributionParam2);
+        //int row = 2;
+        //int column = 2;
         int width = HumanModel.transform.GetChild(0).GetComponent<UISprite>().width;
         int height = HumanModel.transform.GetChild(0).GetComponent<UISprite>().height;
         for (int i = 0; i < row; i++)
@@ -244,10 +263,8 @@ public class Battle_C : MonoBehaviour {
                     //该策略ID的全部加载
                     GeneModel.GetComponent<Gene>().CreateGene(bss.GeneID);
                     gm = NGUITools.AddChild(UpgradeMap, GeneModel);
-                    gm.GetComponent<UISprite>().depth = 10;
                     gm.transform.localPosition = gm.GetComponent<Gene>().Pos;
-                    gm.SetActive(gm.GetComponent<Gene>().IsVisible);
-                    //gm.SetActive(true);
+                    Formula.Btn_IsVisible(gm, gm.GetComponent<Gene>().IsVisible);
 
                     switch (bss.BoardID)
                     {
@@ -361,234 +378,250 @@ public class Battle_C : MonoBehaviour {
         if (BattleState == BattleState.Start)
         {
             Debug.Log("BattleState.Start");
-            MedicineBar.GetComponent<UISlider>().value = BC.Medicine * 1.0f / BC.MedicineWork;
-
-            LabelStrategyPoint.GetComponent<UILabel>().text = BC.StrategyPoint.ToString();
-
-            Timer.text = "";
+            
         }
 
         if (BattleState == BattleState.Game)
         {
-            //Debug.Log("BattleState.Game");
-
-            //战斗用时计时器 battle timer
-            TimeSecond += Time.fixedDeltaTime;
-            Timer.text = "" + (int)TimeSecond + LocalizationEx.LoadLanguageTextName("Day");
-            //战斗事件计时器 battle event timer
-            deltaTime += Time.fixedDeltaTime;
-            //系统定时给予策略点计时器 sp timer
-            deltaTime2 += Time.fixedDeltaTime;
-            //系统出现黄色DNA气泡计时器 dna timer
-            deltaTime3 += Time.fixedDeltaTime;
-
-            if (deltaTime3 >= float.Parse(DataManager.Mission_Parameter[MissionID].EventMin) && deltaTime3 <= float.Parse(DataManager.Mission_Parameter[MissionID].EventMax))
+            updateInterval++;
+            if(updateInterval == UPDATE_INDEX_GAMING)
             {
-                Debug.Log("进入随机出现气泡");
-                float random = UnityEngine.Random.Range(0.0f, 1.0f);
-                if (random > 0.1f && HumanArray.Count > 0)
+                //系统出现黄色DNA气泡计时器 dna timer
+                deltaTime3 += Time.fixedDeltaTime * MAX_UPDATE_INTERVAL;
+
+                if (deltaTime3 >= float.Parse(DataManager.Mission_Parameter[MissionID].EventMin) && deltaTime3 <= float.Parse(DataManager.Mission_Parameter[MissionID].EventMax))
                 {
-                    //出现黄色气泡 yellow bubble
-                    Debug.Log("出现黄色气泡");
+                    Debug.Log("进入随机出现气泡");
+                    float random = UnityEngine.Random.Range(0.0f, 1.0f);
+                    if (random > 0.1f && HumanArray.Count > 0)
+                    {
+                        //出现黄色气泡 yellow bubble
+                        Debug.Log("出现黄色气泡");
 
-                    int randomHuman = UnityEngine.Random.Range(0, HumanArray.Count);
+                        int randomHuman = UnityEngine.Random.Range(0, HumanArray.Count);
 
-                    GameObject spBubble = NGUITools.AddChild(HumanArray[randomHuman] as GameObject, SP_Bubble);
-                    UIEventListener.Get(spBubble).onClick = SPBubble_Click;
-                    spBubble.transform.localPosition = Vector3.zero;
+                        GameObject spBubble = NGUITools.AddChild(HumanArray[randomHuman] as GameObject, SP_Bubble);
+                        UIEventListener.Get(spBubble).onClick = SPBubble_Click;
+                        spBubble.transform.localPosition = Vector3.zero;
 
-                    Destroy(spBubble, SPBUBBLEDIAPPEAR);
+                        Destroy(spBubble, SPBUBBLEDIAPPEAR);
+                        deltaTime3 = 0.0f;
+                    }
+                }
+                else if (deltaTime3 >= float.Parse(DataManager.Mission_Parameter[MissionID].EventMax))
+                {
                     deltaTime3 = 0.0f;
                 }
             }
-            else if(deltaTime3 >= float.Parse(DataManager.Mission_Parameter[MissionID].EventMax))
-            {
-                deltaTime3 = 0.0f;
-            }
 
-            //战斗事件处理 battle event
-            if(deltaTime >= 1.0f)
+            if(updateInterval == UPDATE_INDEX_DATA)
             {
-                //Formula.BattleEventRandom("2");
-                //Formula.ResolveBattleUpgrade("1");
-                deltaTime = 0.0f;
-            }
+                //系统定时给予策略点计时器 sp timer
+                deltaTime2 += Time.fixedDeltaTime * MAX_UPDATE_INTERVAL;
 
-            if(deltaTime2 >= 2.0f)
-            {
-                BC.StrategyPoint += 1;
-                deltaTime2 = 0.0f;
-            }
-
-            //感染度总值达到一定值，就增加策略点 infection reaches a certain value,then increase sp
-            BC.TotalInfection = 0.0f;
-
-            foreach (GameObject h in BC.HumanArray)
-            {
-                BC.TotalInfection += h.GetComponent<Human>().Infection;
-            }
-
-            if (InfectionList.Count > 1)
-            {
-                //从表的上方往下检查
-                if (BC.TotalInfection >= float.Parse(InfectionList[1].TotalInfection))
+                if (deltaTime2 >= 2.0f)
                 {
-                    BC.SP_Add(int.Parse(InfectionList[1].GainSP),StrategyBtn, LabelStrategy,false);
-                    InfectionList.RemoveAt(1);
+                    BC.StrategyPoint += 1;
+                    deltaTime2 = 0.0f;
                 }
-            }
 
-            //丧尸造成伤害达到一定值，就增加策略点 total dmg by zombies reaches a certain value,then increase sp
-            BC.TotalDamage = 0;
-
-            foreach (GameObject h in BC.HumanArray)
-            {
-                BC.TotalDamage += h.GetComponent<Human>().MaxHP - h.GetComponent<Human>().HP;
-            }
-
-            if (DamageList.Count > 1)
-            {
-                //从表的上方往下检查
-                if (BC.TotalDamage >= int.Parse(DamageList[1].TotalDamage))
+                //感染度总值达到一定值，就增加策略点 infection reaches a certain value,then increase sp
+                BC.TotalInfection = 0.0f;
+                
+                foreach (GameObject h in BC.HumanArray)
                 {
-                    BC.SP_Add(int.Parse(DamageList[1].GainSP), StrategyBtn, LabelStrategy,false);
-                    DamageList.RemoveAt(1);
+                    BC.TotalInfection += h.GetComponent<Human>().Infection;
                 }
-            }
 
-
-            LabelStrategyPoint.GetComponent<UILabel>().text = BC.StrategyPoint.ToString();
-
-            //通用规则模块
-
-            //解药 remedy
-            if (BC.Medicine >= BC.MedicineWork)
-            {
-                //治愈人类 cure the human
-                BC.medicineOK = true;
-            }
-
-            MedicineBar.GetComponent<UISlider>().value = BC.Medicine * 1.0f / BC.MedicineWork;
-            MediPercent.text = (int)(MedicineBar.GetComponent<UISlider>().value * 100) + "%";
-
-            //模式专属模块
-            switch (mode)
-            {
-                case Modes.Campaign:
-                    bool anyInfected = true;
-                    foreach(GameObject h in BC.HumanArray)
+                if (InfectionList.Count > 1)
+                {
+                    //从表的上方往下检查
+                    if (BC.TotalInfection >= float.Parse(InfectionList[1].TotalInfection))
                     {
-                        if(h.GetComponent<Human>().Infected)
-                        {
-                            anyInfected = true;
-                            break;
-                        }
-                        else
-                        {
-                            anyInfected = false;
-                        }
+                        BC.SP_Add(int.Parse(InfectionList[1].GainSP), StrategyBtn, LabelStrategy, false);
+                        InfectionList.RemoveAt(1);
                     }
+                }
+            }
 
-                    if (BC.ZombieArray.Count > 0 && BC.HumanArray.Count == 0)         //如果所有人类都死亡，且还存有丧尸,玩家胜利
+            if(updateInterval == UPDATE_INDEX_SKILL)
+            {
+                //丧尸造成伤害达到一定值，就增加策略点 total dmg by zombies reaches a certain value,then increase sp
+                BC.TotalDamage = 0;
+
+                foreach (GameObject h in BC.HumanArray)
+                {
+                    BC.TotalDamage += h.GetComponent<Human>().MaxHP - h.GetComponent<Human>().HP;
+                }
+
+                if (DamageList.Count > 1)
+                {
+                    //从表的上方往下检查
+                    if (BC.TotalDamage >= int.Parse(DamageList[1].TotalDamage))
                     {
-                        //玩家胜利 player win
-                        BC.Result = true;
-                        Debug.Log("Win");
-                        //标记关卡为通关
-                        foreach(U_MissionFlag m in GameManager.user.DB_u_mf)
+                        BC.SP_Add(int.Parse(DamageList[1].GainSP), StrategyBtn, LabelStrategy, false);
+                        DamageList.RemoveAt(1);
+                    }
+                }
+
+                LabelStrategyPoint.GetComponent<UILabel>().text = BC.StrategyPoint.ToString();
+            }
+
+            if(updateInterval == UPDATE_INDEX_MEDICINE)
+            {
+                //解药 remedy
+                if (BC.Medicine >= BC.MedicineWork)
+                {
+                    //治愈人类 cure the human
+                    BC.medicineOK = true;
+                }
+
+                MedicineBar.GetComponent<UISlider>().value = BC.Medicine * 1.0f / BC.MedicineWork;
+                MediPercent.text = (int)(MedicineBar.GetComponent<UISlider>().value * 100) + "%";
+            }
+
+            if(updateInterval == UPDATE_INDEX_MODE)
+            {
+                //模式专属模块
+                switch (mode)
+                {
+                    case Modes.Campaign:
+                        bool anyInfected = true;
+                        foreach (GameObject h in BC.HumanArray)
                         {
-                            if(m.VirusID == VirusID && m.MissionID == MissionID)
+                            if (h.GetComponent<Human>().Infected)
                             {
-                                m.Flag = true;
-                                Debug.Log("m.VirusID = " + m.VirusID + ",  m.MissionID = " + m.MissionID);
-                                GameManager.SaveData();
+                                anyInfected = true;
                                 break;
+                            }
+                            else
+                            {
+                                anyInfected = false;
                             }
                         }
 
-                        BattleState = BattleState.End;
-                    } else if (BC.ZombieArray.Count == 0 && !anyInfected)                                          //如果丧尸全部死亡，且人类都没有被感染，则玩家失败
-                    {
-                        //玩家失败
-                        BC.Result = false;
-                        Debug.Log("Lose:All Zombies Die and None Human is Infected");
-                        BattleState = BattleState.End;
-                    } else if (BC.medicineOK)                                                                      //如果研发出了解药，玩家失败
-                    {
-                        //玩家失败
-                        Debug.Log("Lose:Medicine is Done");
-                        BC.Result = false;
-                        BattleState = BattleState.End;
-                    }
-                    else
-                    {
-                        //BC.Result = false;
-                        //BattleState = BattleState.End;                                                           //任何其他情形，玩家失败
-                    }
+                        if (BC.ZombieArray.Count > 0 && BC.HumanArray.Count == 0)         //如果所有人类都死亡，且还存有丧尸,玩家胜利
+                        {
+                            //玩家胜利 player win
+                            BC.Result = true;
+                            Debug.Log("Win");
+                            //标记关卡为通关
+                            foreach (U_MissionFlag m in GameManager.user.DB_u_mf)
+                            {
+                                if (m.VirusID == VirusID && m.MissionID == MissionID)
+                                {
+                                    m.Flag = true;
+                                    Debug.Log("m.VirusID = " + m.VirusID + ",  m.MissionID = " + m.MissionID);
+                                    GameManager.SaveData();
+                                    break;
+                                }
+                            }
 
-                    break;
-                case Modes.Trial:
-                    break;
-                case Modes.Endless:
-                    break;
+                            BattleState = BattleState.End;
+                        }
+                        else if (BC.ZombieArray.Count == 0 && !anyInfected)                                          //如果丧尸全部死亡，且人类都没有被感染，则玩家失败
+                        {
+                            //玩家失败
+                            Debug.Log("Lose:All Zombies Die and None Human is Infected");
+                            BC.Result = false;
+                            Conclude();
+                            BattleState = BattleState.End;
+                        }
+                        else if (BC.medicineOK)                                                                      //如果研发出了解药，玩家失败
+                        {
+                            //玩家失败
+                            Debug.Log("Lose:Medicine is Done");
+                            BC.Result = false;
+                            Conclude();
+                            BattleState = BattleState.End;
+                        }
+                        else
+                        {
+                            //BC.Result = false;
+                            //BattleState = BattleState.End;                                                           //任何其他情形，玩家失败
+                        }
+
+                        break;
+                    case Modes.Trial:
+                        break;
+                    case Modes.Endless:
+                        break;
+                }
             }
+
+            if (updateInterval == UPDATE_INDEX_TIMING)
+            {
+                //Debug.Log("BattleState.Game");
+                
+                //战斗用时计时器 battle timer
+                updateInterval = UPDATE_INDEX_GAMING;
+                TimeSecond += Time.fixedDeltaTime * MAX_UPDATE_INTERVAL;
+                Timer.text = "" + (int)TimeSecond + LocalizationEx.LoadLanguageTextName("Day");                
+            }
+            
         }
 
         if (BattleState == BattleState.End)
         {
             Debug.Log("BattleState.End");
-            //先清除数据
-            BC.VirusArray.Clear();
-            BC.ZombieArray.Clear();
-            BC.HumanArray.Clear();
-            BC.InfectionList.Clear();
-            BC.DamageList.Clear();
-            BC.UpgradedGenes_Virus.Clear();
-            BC.UpgradedGenes_Human.Clear();
-            BC.UpgradedGenes_Zombie.Clear();
+            
+        }
+    }
 
-            foreach(GameObject go in BC.VirusGeneArray)
-            {
-                Destroy(go);
-            }
-            foreach (GameObject go in BC.HumanGeneArray)
-            {
-                Destroy(go);
-            }
-            foreach (GameObject go in BC.ZombieGeneArray)
-            {
-                Destroy(go);
-            }
+    void Conclude()
+    {
+        //先清除数据
+        BC.VirusArray.Clear();
+        BC.ZombieArray.Clear();
+        BC.HumanArray.Clear();
+        BC.InfectionList.Clear();
+        BC.DamageList.Clear();
+        BC.UpgradedGenes_Virus.Clear();
+        BC.UpgradedGenes_Human.Clear();
+        BC.UpgradedGenes_Zombie.Clear();
 
-            BC.VirusGeneArray.Clear();
-            BC.HumanGeneArray.Clear();
-            BC.ZombieGeneArray.Clear();
+        foreach (GameObject go in BC.VirusGeneArray)
+        {
+            Destroy(go);
+        }
+        foreach (GameObject go in BC.HumanGeneArray)
+        {
+            Destroy(go);
+        }
+        foreach (GameObject go in BC.ZombieGeneArray)
+        {
+            Destroy(go);
+        }
 
-            StrategyBtn.SetActive(false);
-            SpeedBtn.SetActive(false);
+        BC.VirusGeneArray.Clear();
+        BC.HumanGeneArray.Clear();
+        BC.ZombieGeneArray.Clear();
 
-            //Use object pool to restore objects here, modify later
-            //销毁所有人类和丧尸
-            Transform[] children = Entity.GetComponentsInChildren<Transform>();
+        Formula.Btn_IsVisible(StrategyBtn, false);
+        Formula.Btn_IsVisible(SpeedBtn, false);
 
-            //若不大于1，说明此时刚刚初始化
-            if (children.Length > 1)
+        //Use object pool to restore objects here, modify later
+        //销毁所有人类和丧尸
+        Transform[] children = Entity.GetComponentsInChildren<Transform>();
+
+        //若不大于1，说明此时刚刚初始化
+        if (children.Length > 1)
+        {
+            //从1开始，不要删除DNAGrid物体本身
+            for (int i = 1; i < children.Length; i++)
             {
-                //从1开始，不要删除DNAGrid物体本身
-                for (int i = 1; i < children.Length; i++)
-                {
-                    Destroy(children[i].gameObject);
-                }
+                Destroy(children[i].gameObject);
             }
-            EndBattleBtn.SetActive(true);
-            if (BC.Result)
-            {
-                EndBattleBtn.transform.GetChild(0).GetComponent<UILabel>().text = "You Win";
-            }
-            else
-            {
-                EndBattleBtn.transform.GetChild(0).GetComponent<UILabel>().text = "You Lose";
-            }
+        }
+        //EndBattleBtn.SetActive(true);
+        Formula.Btn_IsVisible(EndBattleBtn, true);
+        if (BC.Result)
+        {
+            EndBattleBtn.transform.GetChild(0).GetComponent<UILabel>().text = "You Win";
+        }
+        else
+        {
+            EndBattleBtn.transform.GetChild(0).GetComponent<UILabel>().text = "You Lose";
         }
     }
 
@@ -719,7 +752,8 @@ public class Battle_C : MonoBehaviour {
     public void StrategyBtn_Click(GameObject button)
     {
         Debug.Log("StrategyBtn_Click");
-        InGameUpgradePanel.SetActive(true);
+        //InGameUpgradePanel.SetActive(true);
+        Formula.Btn_IsVisible(InGameUpgradePanel, true);
         Time.timeScale = 0;
         LoadBattleStrategy("1");
     }
@@ -746,7 +780,8 @@ public class Battle_C : MonoBehaviour {
     public void StrategyCloseBtn_Click(GameObject button)
     {
         Debug.Log("StrategyCloseBtn_Click");
-        InGameUpgradePanel.SetActive(false);
+        //InGameUpgradePanel.SetActive(false);
+        Formula.Btn_IsVisible(InGameUpgradePanel, false);
         Time.timeScale = currentTimeScale;
     }
 }

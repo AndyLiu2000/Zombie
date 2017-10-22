@@ -182,11 +182,13 @@ public class Gene : MonoBehaviour {
                 IsUpgradable = false;
             }
 
-            gameObject.SetActive(IsVisible);
+            //gameObject.SetActive(IsVisible);
+            Formula.Btn_IsVisible(gameObject, IsVisible);
         }
         else
         {
-            gameObject.SetActive(false);
+            //gameObject.SetActive(false);
+            Formula.Btn_IsVisible(gameObject, false);
         }
     }
 
