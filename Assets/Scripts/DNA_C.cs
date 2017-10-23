@@ -35,6 +35,9 @@ public class DNA_C : MonoBehaviour {
         OP = new ObjectPool<GameObject,DNAUp_Sheet>(10,ResetDNAData,InitDNAData);
 
         prefabscellChildrenNum = prefabs_Cell.GetComponentsInChildren<Transform>().Length;
+
+		DNAGrid.GetComponent<UIGrid> ().cellWidth = DNAScroll.GetComponent<UIPanel> ().GetViewSize ().x;
+		prefabs_Cell.GetComponent<UISprite> ().width = (int)DNAGrid.GetComponent<UIGrid> ().cellWidth;
     }
 
     public void Enter()

@@ -212,7 +212,6 @@
      <Compile Include="Assets\Scripts\Main_C.cs" />
      <Compile Include="Assets\Scripts\Mission.cs" />
      <Compile Include="Assets\Scripts\Model.cs" />
-     <Compile Include="Assets\Scripts\Modes_C.cs" />
      <Compile Include="Assets\Scripts\ObjectPool.cs" />
      <Compile Include="Assets\Scripts\Option_C.cs" />
      <Compile Include="Assets\Scripts\Performance.cs" />

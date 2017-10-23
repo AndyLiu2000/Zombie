@@ -106,6 +106,6 @@ public class CampaignResult_C : MonoBehaviour {
     public void CampaignResult_BackBtn_Click(GameObject b)
     {
         Debug.Log("BackBtn_Click");
-        GameManager.ChangePanel(GameManager.UIS[GameManager.CAMPAIGNRESULT], GameManager.UIS[GameManager.MODES],0);
+        GameManager.ChangePanel(GameManager.UIS[GameManager.CAMPAIGNRESULT], GameManager.UIS[GameManager.VIRUSSELECT],0);
     }
 }

@@ -12,7 +12,6 @@ public class GameManager :MonoBehaviour {
     public const string OPTION = "Option";
     public const string SHOP = "Shop";
     public const string DNA = "DNA";
-    public const string MODES = "Modes";
     public const string VIRUSSELECT = "VirusSelect";
     public const string CAMPAIGN = "Campaign";
     public const string CAMPAIGNRESULT = "CampaignResult";
@@ -25,6 +24,8 @@ public class GameManager :MonoBehaviour {
 
     public static GameObject Battle;
     public static Battle_C BC;
+    public const int StandardWidth = 1920;
+    public const int StandardHeight = 1080;
 
     void Awake () {
         Debug.Log("GameManager.start");
@@ -92,7 +93,6 @@ public class GameManager :MonoBehaviour {
         UIS.Add(OPTION, GameObject.Find(OPTION));
         UIS.Add(SHOP, GameObject.Find(SHOP));
         UIS.Add(DNA, GameObject.Find(DNA));
-        UIS.Add(MODES, GameObject.Find(MODES));
         UIS.Add(VIRUSSELECT, GameObject.Find(VIRUSSELECT));
         UIS.Add(CAMPAIGN, GameObject.Find(CAMPAIGN));
         UIS.Add(CAMPAIGNRESULT, GameObject.Find(CAMPAIGNRESULT));

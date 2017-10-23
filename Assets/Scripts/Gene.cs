@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class Gene : MonoBehaviour {
 
+	const int HALF_COLUMN = 7;
+	const int WHOLE_COLUMN = 15;
+	const int HALF_ROW = 3;
+	const int WHOLE_ROW = 7;
     //基因本身的所有相关量
     public string GeneID;
     public string StrategyID;
@@ -30,7 +34,7 @@ public class Gene : MonoBehaviour {
 
     //环境变量
     UILabel Label_EvolutionDes;
-    Battle_C Battle;
+	public Battle_C Battle;
     float oneSecondDeltaTime = 0;
     float fiveSecondDeltaTime = 0;
 
@@ -41,6 +45,7 @@ public class Gene : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
+
         self = gameObject.GetComponent<Gene>();
 
         UIEventListener.Get(gameObject).onClick = SelfBtn_Click;
@@ -84,7 +89,7 @@ public class Gene : MonoBehaviour {
         //State = GeneState.UnVisible;
 
         //设定位置
-        Pos = new Vector3(Column * 60.0f, -Row * 60.0f,1.0f);
+		Pos = new Vector3((Column -HALF_COLUMN)* GameManager.BC.UpgradeMapWidth / WHOLE_COLUMN, - (Row - HALF_ROW) * GameManager.BC.UpgradeMapHeigth / WHOLE_ROW,1.0f);
 
         //如果两个父节点都为0，则为初始可见的 if both father nodes are 0, it's visible
         if(FP1 == "0" && FP2 == "0")

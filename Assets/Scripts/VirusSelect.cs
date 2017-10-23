@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class VirusSelect : MonoBehaviour {
     public GameObject prefabs_Cell;
+	public GameObject VirusSelectScroll;
     public GameObject VirusSelectGrid;
     public GameObject VirusSelectBackBtn;
     public int UnlockedMissionNum;
@@ -21,6 +22,14 @@ public class VirusSelect : MonoBehaviour {
         LabelUnlockedMissionNum = GameObject.Find("UnlockedMissionNum").GetComponent<UILabel>();
 
         OP = new ObjectPool<GameObject, Virus_Sheet>(10, ResetVirusData, InitVirusData);
+
+		VirusSelectGrid.GetComponent<UIGrid> ().cellWidth = (int)(VirusSelectScroll.GetComponent<UIPanel> ().GetViewSize().x / 5);
+		VirusSelectGrid.GetComponent<UIGrid> ().cellHeight = VirusSelectGrid.GetComponent<UIGrid> ().cellWidth;
+		prefabs_Cell.GetComponent<UISprite> ().width = (int)VirusSelectGrid.GetComponent<UIGrid> ().cellWidth;
+		prefabs_Cell.GetComponent<UISprite> ().height = prefabs_Cell.GetComponent<UISprite> ().width;
+
+		VirusSelectGrid.transform.localPosition = new Vector3 ((VirusSelectScroll.GetComponent<UIPanel> ().GetViewSize().x - VirusSelectGrid.GetComponent<UIGrid> ().cellWidth) / 2 * -1,
+			(VirusSelectScroll.GetComponent<UIPanel> ().GetViewSize().y - VirusSelectGrid.GetComponent<UIGrid> ().cellHeight) / 2 - 20,0);
     }
 
     public void Enter()
@@ -107,6 +116,6 @@ public class VirusSelect : MonoBehaviour {
     public void VirusSelectBackBtn_Click(GameObject button)
     {
         Debug.Log("VirusSelectBackBtn_Click");
-        GameManager.ChangePanel(GameManager.UIS[GameManager.VIRUSSELECT], GameManager.UIS[GameManager.MODES], 0);
+        GameManager.ChangePanel(GameManager.UIS[GameManager.VIRUSSELECT], GameManager.UIS[GameManager.MAIN], 0);
     }
 }

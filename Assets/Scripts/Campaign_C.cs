@@ -23,6 +23,14 @@ public class Campaign_C : MonoBehaviour {
 
         OP = new ObjectPool<GameObject, Mission_Sheet>(10, ResetMissionData, InitMissioinData);
         prefabscellChildrenNum = prefabs_Cell.GetComponentsInChildren<Transform>().Length;
+
+		CampainGrid.GetComponent<UIGrid> ().cellWidth = (int)(CampainScroll.GetComponent<UIPanel> ().GetViewSize().x / 5);
+		CampainGrid.GetComponent<UIGrid> ().cellHeight = CampainGrid.GetComponent<UIGrid> ().cellWidth;
+		prefabs_Cell.GetComponent<UISprite> ().width = (int)CampainGrid.GetComponent<UIGrid> ().cellWidth;
+		prefabs_Cell.GetComponent<UISprite> ().height = prefabs_Cell.GetComponent<UISprite> ().width;
+
+		CampainGrid.transform.localPosition = new Vector3 ((CampainScroll.GetComponent<UIPanel> ().GetViewSize().x - CampainGrid.GetComponent<UIGrid> ().cellWidth) / 2 * -1,
+			(CampainScroll.GetComponent<UIPanel> ().GetViewSize().y - CampainGrid.GetComponent<UIGrid> ().cellHeight) / 2 - 20,0);
     }
 
     public void Enter(int curVirusID)

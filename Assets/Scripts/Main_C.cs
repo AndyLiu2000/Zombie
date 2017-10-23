@@ -7,6 +7,8 @@ public class Main_C : MonoBehaviour {
 
     public UILabel LabelGold;
     public UILabel LabelGem;
+    public GameObject Gold;
+    public GameObject Gem;
 
     public GameObject Main_StartBtn;
     public GameObject Main_DNABtn;
@@ -19,6 +21,9 @@ public class Main_C : MonoBehaviour {
         UIEventListener.Get(Main_DNABtn).onClick = Main_DNABtn_Click;
         UIEventListener.Get(Main_OptionBtn).onClick = Main_OptionBtn_Click;
         UIEventListener.Get(Main_ShopBtn).onClick = Main_ShopBtn_Click;
+		float factor = Screen.width / GameManager.StandardWidth;
+		//Gold.transform.localScale = new Vector3(factor, factor, 1);
+		//Gem.transform.localScale = new Vector3(factor, factor, 1);
     }
 
     public void Enter()
@@ -30,7 +35,7 @@ public class Main_C : MonoBehaviour {
     public void Main_StartBtn_Click(GameObject button)
     {
         Debug.Log("StartBtn_Click");
-        GameManager.ChangePanel(GameManager.UIS[GameManager.MAIN], GameManager.UIS[GameManager.MODES],0);
+		GameManager.ChangePanel(GameManager.UIS[GameManager.MAIN], GameManager.UIS[GameManager.VIRUSSELECT],0);
     }
 
     public void Main_DNABtn_Click(GameObject b)

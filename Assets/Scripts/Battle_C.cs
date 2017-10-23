@@ -49,6 +49,8 @@ public class Battle_C : MonoBehaviour {
     const int UPDATE_INDEX_MODE = 4;
     const int UPDATE_INDEX_TIMING = 5;
     int updateInterval = 0;
+	public int UpgradeMapWidth = 0;
+	public int UpgradeMapHeigth = 0;
 
     //关卡数据
     public int MissionID;
@@ -150,6 +152,35 @@ public class Battle_C : MonoBehaviour {
         LabelEvolutionCost = GameObject.Find("LabelEvolutionCost").GetComponent<UILabel>();
 
         LabelSpeed = GameObject.Find("LabelSpeed").GetComponent<UILabel>();
+
+		VirusUpBtn.GetComponent<UISprite> ().width = 260;
+		VirusUpBtn.GetComponent<UISprite> ().height = 72;
+		float factorX = VirusUpBtn.GetComponent<UISprite> ().width * 1.0f / GameManager.StandardWidth;
+		float factorY = VirusUpBtn.GetComponent<UISprite> ().height * 1.0f / GameManager.StandardHeight;
+		VirusUpBtn.GetComponent<UISprite> ().width = (int)(Screen.width * factorX);
+		VirusUpBtn.GetComponent<UISprite> ().height = (int)(Screen.height * factorY);
+		int battleBGWidth = GameObject.Find ("BattleBG").GetComponent<UISprite> ().width;
+
+		VirusUpBtn.transform.localPosition = new Vector3 (-battleBGWidth * 3 / 8, strategyCloseBtn.transform.localPosition.y, 0);
+		HumanUpBtn.transform.localPosition = new Vector3 (-battleBGWidth / 8, strategyCloseBtn.transform.localPosition.y, 0);
+		ZombieUpBtn.transform.localPosition = new Vector3 (battleBGWidth / 8, strategyCloseBtn.transform.localPosition.y, 0);
+
+		HumanUpBtn.GetComponent<UISprite> ().width = VirusUpBtn.GetComponent<UISprite> ().width;
+		HumanUpBtn.GetComponent<UISprite> ().height = VirusUpBtn.GetComponent<UISprite> ().height;
+		ZombieUpBtn.GetComponent<UISprite> ().width = VirusUpBtn.GetComponent<UISprite> ().width;
+		ZombieUpBtn.GetComponent<UISprite> ().height = VirusUpBtn.GetComponent<UISprite> ().height;
+
+		VirusProBar.transform.localPosition = new Vector3 (-battleBGWidth * 3 / 8, -strategyCloseBtn.transform.localPosition.y, 0);
+		HumanProBar.transform.localPosition = new Vector3 (-battleBGWidth / 8, -strategyCloseBtn.transform.localPosition.y, 0);
+		ZombieProBar.transform.localPosition = new Vector3 (battleBGWidth / 8, -strategyCloseBtn.transform.localPosition.y, 0);
+
+		VirusProBar.GetComponent<UISprite> ().width = VirusUpBtn.GetComponent<UISprite> ().width;
+		HumanProBar.GetComponent<UISprite> ().width = VirusUpBtn.GetComponent<UISprite> ().width;
+		ZombieProBar.GetComponent<UISprite> ().width = VirusUpBtn.GetComponent<UISprite> ().width;
+
+		UpgradeMapWidth = (int)GameObject.Find("UpgradeMapBG").GetComponent<UISprite>().width;
+		UpgradeMapHeigth = (int)GameObject.Find("UpgradeMapBG").GetComponent<UISprite>().height;
+		Debug.Log ("UpgradeMapWidth = " + UpgradeMapWidth);
     }
 
     //接收不同模式的数据，方便以后独立处理，Enter结束之后才开始Update. init mode data
@@ -207,6 +238,7 @@ public class Battle_C : MonoBehaviour {
         Timer.text = "";
 
         BattleState = BattleState.Start;
+
     }
 
     void LoadEntity(int curVirusID, int curMissionID)
@@ -516,6 +548,7 @@ public class Battle_C : MonoBehaviour {
                                     break;
                                 }
                             }
+							Conclude();
 
                             BattleState = BattleState.End;
                         }
