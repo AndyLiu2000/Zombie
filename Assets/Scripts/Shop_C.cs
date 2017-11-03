@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 public class Shop_C : MonoBehaviour {
 
+	public GameObject ShopScroll;
     public GameObject ShopGrid;
     public GameObject prefabs_Cell;
     public GameObject Shop_BackBtn;
@@ -14,6 +15,15 @@ public class Shop_C : MonoBehaviour {
     void Start () {
         UIEventListener.Get(Shop_BackBtn).onClick = Shop_BackBtn_Click;
         OP = new ObjectPool<GameObject, IAP_Sheet>(10, ResetIAPData, InitIAPData);
+
+		ShopGrid.GetComponent<UIGrid> ().cellWidth = (int)(ShopScroll.GetComponent<UIPanel> ().GetViewSize().x / 5);
+		ShopGrid.GetComponent<UIGrid> ().cellHeight = (int)(ShopScroll.GetComponent<UIPanel> ().GetViewSize().y - 20);
+		prefabs_Cell.GetComponent<UISprite> ().width = (int)ShopGrid.GetComponent<UIGrid> ().cellWidth;
+		prefabs_Cell.GetComponent<UISprite> ().height = (int)ShopGrid.GetComponent<UIGrid> ().cellHeight;
+		prefabs_Cell.GetComponent<BoxCollider> ().size = new Vector3 ((int)ShopGrid.GetComponent<UIGrid> ().cellWidth, (int)ShopGrid.GetComponent<UIGrid> ().cellHeight);
+
+		ShopGrid.transform.localPosition = new Vector3 ((ShopScroll.GetComponent<UIPanel> ().GetViewSize().x - ShopGrid.GetComponent<UIGrid> ().cellWidth) / 2 * -1,
+			(ShopScroll.GetComponent<UIPanel> ().GetViewSize().y - ShopGrid.GetComponent<UIGrid> ().cellHeight) / 2);
     }
 
     public void Enter()

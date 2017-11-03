@@ -273,7 +273,7 @@ public class Human : MonoBehaviour{
 
             if (updateInterval == UPDATE_INDEX_TIMING)
             {
-                updateInterval = UPDATE_INDEX_SELF;
+                updateInterval = UPDATE_INDEX_SELF - 1;
             }
             
         }

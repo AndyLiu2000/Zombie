@@ -418,9 +418,10 @@ public class Battle_C : MonoBehaviour {
             updateInterval++;
             if(updateInterval == UPDATE_INDEX_GAMING)
             {
+				Debug.Log ("updateInterval = " + updateInterval);
                 //系统出现黄色DNA气泡计时器 dna timer
                 deltaTime3 += Time.fixedDeltaTime * MAX_UPDATE_INTERVAL;
-
+				Debug.Log ("deltaTime3 = " + deltaTime3);
                 if (deltaTime3 >= float.Parse(DataManager.Mission_Parameter[MissionID].EventMin) && deltaTime3 <= float.Parse(DataManager.Mission_Parameter[MissionID].EventMax))
                 {
                     Debug.Log("进入随机出现气泡");
@@ -587,7 +588,7 @@ public class Battle_C : MonoBehaviour {
                 //Debug.Log("BattleState.Game");
                 
                 //战斗用时计时器 battle timer
-                updateInterval = UPDATE_INDEX_GAMING;
+                updateInterval = UPDATE_INDEX_GAMING - 1;
                 TimeSecond += Time.fixedDeltaTime * MAX_UPDATE_INTERVAL;
                 Timer.text = "" + (int)TimeSecond + LocalizationEx.LoadLanguageTextName("Day");                
             }

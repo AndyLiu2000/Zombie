@@ -28,6 +28,7 @@ public class Campaign_C : MonoBehaviour {
 		CampainGrid.GetComponent<UIGrid> ().cellHeight = CampainGrid.GetComponent<UIGrid> ().cellWidth;
 		prefabs_Cell.GetComponent<UISprite> ().width = (int)CampainGrid.GetComponent<UIGrid> ().cellWidth;
 		prefabs_Cell.GetComponent<UISprite> ().height = prefabs_Cell.GetComponent<UISprite> ().width;
+		prefabs_Cell.GetComponent<BoxCollider> ().size = new Vector3 ((int)CampainGrid.GetComponent<UIGrid> ().cellWidth, (int)CampainGrid.GetComponent<UIGrid> ().cellHeight);
 
 		CampainGrid.transform.localPosition = new Vector3 ((CampainScroll.GetComponent<UIPanel> ().GetViewSize().x - CampainGrid.GetComponent<UIGrid> ().cellWidth) / 2 * -1,
 			(CampainScroll.GetComponent<UIPanel> ().GetViewSize().y - CampainGrid.GetComponent<UIGrid> ().cellHeight) / 2 - 20,0);

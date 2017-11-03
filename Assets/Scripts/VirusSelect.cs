@@ -27,6 +27,7 @@ public class VirusSelect : MonoBehaviour {
 		VirusSelectGrid.GetComponent<UIGrid> ().cellHeight = VirusSelectGrid.GetComponent<UIGrid> ().cellWidth;
 		prefabs_Cell.GetComponent<UISprite> ().width = (int)VirusSelectGrid.GetComponent<UIGrid> ().cellWidth;
 		prefabs_Cell.GetComponent<UISprite> ().height = prefabs_Cell.GetComponent<UISprite> ().width;
+		prefabs_Cell.GetComponent<BoxCollider> ().size = new Vector3 ((int)VirusSelectGrid.GetComponent<UIGrid> ().cellWidth, (int)VirusSelectGrid.GetComponent<UIGrid> ().cellHeight);
 
 		VirusSelectGrid.transform.localPosition = new Vector3 ((VirusSelectScroll.GetComponent<UIPanel> ().GetViewSize().x - VirusSelectGrid.GetComponent<UIGrid> ().cellWidth) / 2 * -1,
 			(VirusSelectScroll.GetComponent<UIPanel> ().GetViewSize().y - VirusSelectGrid.GetComponent<UIGrid> ().cellHeight) / 2 - 20,0);
