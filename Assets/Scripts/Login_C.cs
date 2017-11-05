@@ -3,7 +3,6 @@ using System.Collections;
 
 public class Login_C : MonoBehaviour {
 
-    public UILabel LoginLabel;
     public GameObject Login_StartBtn;
 
     private void Start()
@@ -14,7 +13,6 @@ public class Login_C : MonoBehaviour {
     //在界面的Enter方法里写界面文字的显示处理
     public void enter()
     {
-        LoginLabel.text = LocalizationEx.LoadLanguageTextName("Login");
     }
 
     public void Login_StartBtn_Click(GameObject button)

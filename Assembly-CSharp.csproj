@@ -117,6 +117,7 @@
      <Compile Include="Assets\NGUI\Scripts\Interaction\UISavedOption.cs" />
      <Compile Include="Assets\NGUI\Scripts\Interaction\UIScrollBar.cs" />
      <Compile Include="Assets\NGUI\Scripts\Interaction\UIScrollView.cs" />
+     <Compile Include="Assets\NGUI\Scripts\Interaction\UIShowControlScheme.cs" />
      <Compile Include="Assets\NGUI\Scripts\Interaction\UISlider.cs" />
      <Compile Include="Assets\NGUI\Scripts\Interaction\UISoundVolume.cs" />
      <Compile Include="Assets\NGUI\Scripts\Interaction\UITable.cs" />
@@ -134,6 +135,7 @@
      <Compile Include="Assets\NGUI\Scripts\Internal\ByteReader.cs" />
      <Compile Include="Assets\NGUI\Scripts\Internal\EventDelegate.cs" />
      <Compile Include="Assets\NGUI\Scripts\Internal\Localization.cs" />
+     <Compile Include="Assets\NGUI\Scripts\Internal\MinMaxRangeAttribute.cs" />
      <Compile Include="Assets\NGUI\Scripts\Internal\NGUIDebug.cs" />
      <Compile Include="Assets\NGUI\Scripts\Internal\NGUIMath.cs" />
      <Compile Include="Assets\NGUI\Scripts\Internal\NGUIText.cs" />
@@ -155,8 +157,10 @@
      <Compile Include="Assets\NGUI\Scripts\Tweening\SpringPosition.cs" />
      <Compile Include="Assets\NGUI\Scripts\Tweening\TweenAlpha.cs" />
      <Compile Include="Assets\NGUI\Scripts\Tweening\TweenColor.cs" />
+     <Compile Include="Assets\NGUI\Scripts\Tweening\TweenFill.cs" />
      <Compile Include="Assets\NGUI\Scripts\Tweening\TweenFOV.cs" />
      <Compile Include="Assets\NGUI\Scripts\Tweening\TweenHeight.cs" />
+     <Compile Include="Assets\NGUI\Scripts\Tweening\TweenLetters.cs" />
      <Compile Include="Assets\NGUI\Scripts\Tweening\TweenOrthoSize.cs" />
      <Compile Include="Assets\NGUI\Scripts\Tweening\TweenPosition.cs" />
      <Compile Include="Assets\NGUI\Scripts\Tweening\TweenRotation.cs" />
@@ -170,6 +174,7 @@
      <Compile Include="Assets\NGUI\Scripts\UI\UIAnchor.cs" />
      <Compile Include="Assets\NGUI\Scripts\UI\UIAtlas.cs" />
      <Compile Include="Assets\NGUI\Scripts\UI\UICamera.cs" />
+     <Compile Include="Assets\NGUI\Scripts\UI\UIColorPicker.cs" />
      <Compile Include="Assets\NGUI\Scripts\UI\UIFont.cs" />
      <Compile Include="Assets\NGUI\Scripts\UI\UIInput.cs" />
      <Compile Include="Assets\NGUI\Scripts\UI\UIInputOnGUI.cs" />

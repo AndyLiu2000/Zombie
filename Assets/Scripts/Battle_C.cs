@@ -51,6 +51,11 @@ public class Battle_C : MonoBehaviour {
     int updateInterval = 0;
 	public int UpgradeMapWidth = 0;
 	public int UpgradeMapHeigth = 0;
+	public int HUMANMODEL_WIDTH = 200;
+	public int HUMANMODEL_HEIGHT = 225;
+	public int BUBBLE_WIDTH = 150;
+	public int BUBBLE_HEIGHT = 150;
+
 
     //关卡数据
     public int MissionID;
@@ -77,6 +82,7 @@ public class Battle_C : MonoBehaviour {
     public int InfectNum;
     public int InfectKillNum;
     public int ZombieKillNum;
+	public float ModelAspect;
 
     //物件引用
     public GameObject StrategyBtn;
@@ -157,8 +163,8 @@ public class Battle_C : MonoBehaviour {
 		VirusUpBtn.GetComponent<UISprite> ().height = 72;
 		float factorX = VirusUpBtn.GetComponent<UISprite> ().width * 1.0f / GameManager.StandardWidth;
 		float factorY = VirusUpBtn.GetComponent<UISprite> ().height * 1.0f / GameManager.StandardHeight;
-		VirusUpBtn.GetComponent<UISprite> ().width = (int)(Screen.width * factorX);
-		VirusUpBtn.GetComponent<UISprite> ().height = (int)(Screen.height * factorY);
+		VirusUpBtn.GetComponent<UISprite> ().width = (int)(GameManager.StandardWidth * factorX);
+		VirusUpBtn.GetComponent<UISprite> ().height = (int)(GameManager.StandardHeight * factorY);
 		int battleBGWidth = GameObject.Find ("BattleBG").GetComponent<UISprite> ().width;
 
 		VirusUpBtn.transform.localPosition = new Vector3 (-battleBGWidth * 3 / 8, strategyCloseBtn.transform.localPosition.y, 0);
@@ -247,13 +253,24 @@ public class Battle_C : MonoBehaviour {
         CurVirus = new Virus(curVirusID, MissionID);
         StrategyPoint = CurVirus.InitialSP;
 
-        //随机生成人类数据，矩阵排布，临时方案 temporary resolution. line all humans in matrix
+        //随机生成人类数据，矩阵排布 line all humans in matrix
         int row = int.Parse(DataManager.Mission_Parameter[MissionID].DistributionParam1);
         int column = int.Parse(DataManager.Mission_Parameter[MissionID].DistributionParam2);
         //int row = 2;
         //int column = 2;
-        int width = HumanModel.transform.GetChild(0).GetComponent<UISprite>().width;
-        int height = HumanModel.transform.GetChild(0).GetComponent<UISprite>().height;
+		int battleBGHeight = GameObject.Find ("BattleBG").GetComponent<UISprite> ().height; 
+
+		ModelAspect = battleBGHeight * 1.0f / GameManager.StandardHeight;
+
+		int width = (int)(HUMANMODEL_WIDTH * ModelAspect);
+		int height = (int)(HUMANMODEL_HEIGHT * ModelAspect);
+
+		HumanModel.transform.GetChild (0).GetComponent<UISprite> ().width = width;
+		HumanModel.transform.GetChild (0).GetComponent<UISprite> ().height = height;
+		HumanModel.GetComponent<BoxCollider> ().size = new Vector2 (width, height);
+
+		int space = (int)SpeedBtn.GetComponent<UISprite> ().localSize.y;
+
         for (int i = 0; i < row; i++)
         {
             for (int j = 0; j < column; j++)
@@ -261,7 +278,7 @@ public class Battle_C : MonoBehaviour {
                 HumanModel.GetComponent<Human>().CreateHuman(curMissionID);
 
                 GameObject hm = NGUITools.AddChild(Entity, HumanModel);
-                Vector3 pos = new Vector3((-column / 2 + j) * width, (-row / 2 + i) * height + height / 2,0);
+				Vector3 pos = new Vector3((-column / 2 + j) * width + space, (-row / 2 + i) * height + height / 2 + space,0);
                 hm.transform.localPosition = pos;
 
                 NGUITools.SetDirty(Entity);
@@ -432,7 +449,8 @@ public class Battle_C : MonoBehaviour {
                         Debug.Log("出现黄色气泡");
 
                         int randomHuman = UnityEngine.Random.Range(0, HumanArray.Count);
-
+						SP_Bubble.GetComponent<UISprite> ().width = (int)(BUBBLE_WIDTH * ModelAspect);
+						SP_Bubble.GetComponent<UISprite> ().height = (int)(BUBBLE_HEIGHT * ModelAspect);
                         GameObject spBubble = NGUITools.AddChild(HumanArray[randomHuman] as GameObject, SP_Bubble);
                         UIEventListener.Get(spBubble).onClick = SPBubble_Click;
                         spBubble.transform.localPosition = Vector3.zero;

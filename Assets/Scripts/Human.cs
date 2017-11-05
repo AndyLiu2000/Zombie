@@ -389,6 +389,14 @@ public class Human : MonoBehaviour{
 
         ZombieModel.GetComponent<Zombie>().CreateZombie(randomZombieID, Battle.MissionID, Clim, Envi);
 
+		int battleBGHeight = GameObject.Find ("BattleBG").GetComponent<UISprite> ().height; 
+
+		int width = (int)(Battle.HUMANMODEL_WIDTH * Battle.ModelAspect);
+		int height = (int)(Battle.HUMANMODEL_HEIGHT * Battle.ModelAspect);
+
+		ZombieModel.transform.GetChild (0).GetComponent<UISprite> ().width = width;
+		ZombieModel.transform.GetChild (0).GetComponent<UISprite> ().height = height;
+
         GameObject zm = NGUITools.AddChild(Entity, ZombieModel);
         zm.transform.localPosition = gameObject.transform.localPosition;
 
@@ -578,12 +586,15 @@ public class Human : MonoBehaviour{
             //把所有其他人类上的感染按钮消除
             foreach (GameObject h in Battle.HumanArray)
             {
-                if(h.transform.Find("InfectBtn(Clone)") != null)
+                if(h.transform.Find("InfectBtn") != null)
                 {
-                    Destroy(h.transform.Find("InfectBtn(Clone)").gameObject);
+                    Destroy(h.transform.Find("InfectBtn").gameObject);
                 }
             }
-            
+			Debug.Log ("Battle.BUBBLE_WIDTH = " + Battle.BUBBLE_WIDTH);
+			StartBubble.GetComponent<UISprite> ().width = (int)(Battle.BUBBLE_WIDTH * Battle.ModelAspect);
+			StartBubble.GetComponent<UISprite> ().height = (int)(Battle.BUBBLE_HEIGHT * Battle.ModelAspect);
+			Debug.Log ("width = " + StartBubble.GetComponent<UISprite> ().width);
             GameObject startBubble = NGUITools.AddChild(gameObject, StartBubble);
             UIEventListener.Get(startBubble).onClick = InfectBtn_Click;
             startBubble.transform.localPosition = Vector3.zero;

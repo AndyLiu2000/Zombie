@@ -24,8 +24,8 @@ public class GameManager :MonoBehaviour {
 
     public static GameObject Battle;
     public static Battle_C BC;
-    public const int StandardWidth = 1920;
-    public const int StandardHeight = 1080;
+	public static int StandardWidth = 1920;
+	public static int StandardHeight = 1080;
 
     void Awake () {
         Debug.Log("GameManager.start");
@@ -117,6 +117,14 @@ public class GameManager :MonoBehaviour {
 
     private void Start()
     {
+		UIRoot root = GameObject.FindObjectOfType<UIRoot> ();
+		if (root != null) {
+			float s = (float)root.activeHeight / Screen.height;
+			StandardHeight = Mathf.CeilToInt (Screen.height * s);
+			StandardWidth = Mathf.CeilToInt (Screen.width * s);
+			Debug.Log ("StandardHeight = " + StandardHeight);
+			Debug.Log ("StandardWidth = " + StandardWidth);
+		}
         //隐藏所有界面
         foreach (string ui in UIS.Keys)
         {

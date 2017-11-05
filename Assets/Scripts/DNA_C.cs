@@ -37,7 +37,9 @@ public class DNA_C : MonoBehaviour {
         prefabscellChildrenNum = prefabs_Cell.GetComponentsInChildren<Transform>().Length;
 
 		DNAGrid.GetComponent<UIGrid> ().cellWidth = DNAScroll.GetComponent<UIPanel> ().GetViewSize ().x;
+		DNAGrid.transform.localPosition = new Vector3 (0, DNAScroll.GetComponent<UIPanel> ().GetViewSize().y *0.5f- prefabs_Cell.GetComponent<UISprite> ().height *0.5f);
 		prefabs_Cell.GetComponent<UISprite> ().width = (int)DNAGrid.GetComponent<UIGrid> ().cellWidth;
+		Debug.Log ("clipping= " + DNAScroll.GetComponent<UIPanel> ().clipping);
     }
 
     public void Enter()
