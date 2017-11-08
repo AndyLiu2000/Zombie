@@ -1,15 +1,15 @@
 ﻿<Properties StartupItem="Assembly-CSharp.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Battle_C.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Human.cs">
     <Files>
-      <File FileName="Assets/Scripts/Human.cs" Line="586" Column="69" />
-      <File FileName="Assets/Scripts/Main_C.cs" Line="24" Column="58" />
-      <File FileName="Assets/Scripts/DNA_C.cs" Line="42" Column="29" />
-      <File FileName="Assets/Scripts/Login_C.cs" Line="15" Column="6" />
-      <File FileName="Assets/Scripts/GameManager.cs" Line="167" Column="3" />
+      <File FileName="Assets/Scripts/Battle_C.cs" Line="55" Column="9" />
+      <File FileName="Assets/Scripts/Human.cs" Line="398" Column="80" />
+      <File FileName="Assets/Scripts/Main_C.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/DNA_C.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/Login_C.cs" Line="1" Column="1" />
+      <File FileName="Assets/Scripts/GameManager.cs" Line="1" Column="1" />
       <File FileName="Assets/NGUI/Scripts/UI/UIPanel.cs" Line="1" Column="1" />
       <File FileName="Assets/NGUI/Scripts/Internal/UIDrawCall.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/Battle_C.cs" Line="55" Column="36" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
