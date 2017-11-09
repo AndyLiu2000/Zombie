@@ -16,6 +16,7 @@ public class GameManager :MonoBehaviour {
     public const string CAMPAIGN = "Campaign";
     public const string CAMPAIGNRESULT = "CampaignResult";
     public const string BATTLE = "Battle";
+	public const string CASINO = "Casino";
 
     //public static CurrLanguage;       //用户语言类型
     public static User user;            //用户数据
@@ -33,7 +34,7 @@ public class GameManager :MonoBehaviour {
         Debug.Log("SystemLanguage = " + Application.systemLanguage.ToString());
 
         //读取数据表
-        DataManager.ReadDatas();
+        //DataManager.ReadDatas();
 
         //新建需要使用的类
         user = new User();
@@ -45,10 +46,12 @@ public class GameManager :MonoBehaviour {
         {
             //读档
             Debug.Log("Loading Option....");
-
+			//PlayerPrefs.DeleteAll();
             AudioManager.BgVolume = PlayerPrefs.GetFloat("MusicVolume");
             AudioManager.IsSoundOn = bool.Parse(PlayerPrefs.GetString("IsSoundOn"));
             LocalizationEx.LoadLanguage();
+
+			Casino.Rank = int.Parse(PlayerPrefs.GetString("Rank"));
 
             Debug.Log("Load Option Complete");
         }
@@ -62,8 +65,16 @@ public class GameManager :MonoBehaviour {
             PlayerPrefs.SetString("IsSoundOn", AudioManager.IsSoundOn.ToString());
             LocalizationEx.SaveLanguage(LanguageChange.init);
 
+			PlayerPrefs.SetString("Rank", Casino.Rank.ToString());
+
             Debug.Log("Save Option Complete");
         }
+
+		//设定环境参数
+		AudioManager.ChangeBGVolumeTo(AudioManager.BgVolume);
+		AudioManager.ChangeMEToggle(AudioManager.IsSoundOn);
+		GameObject.Find ("MusicBar").GetComponent<UISlider> ().value = AudioManager.BgVolume;
+		GameObject.Find ("SoundSwitch").GetComponent<UIToggle>().value = AudioManager.IsSoundOn;
 
         //用户数据读档、存档
         //定义存档路径
@@ -97,6 +108,7 @@ public class GameManager :MonoBehaviour {
         UIS.Add(CAMPAIGN, GameObject.Find(CAMPAIGN));
         UIS.Add(CAMPAIGNRESULT, GameObject.Find(CAMPAIGNRESULT));
         UIS.Add(BATTLE, GameObject.Find(BATTLE));
+		UIS.Add(CASINO, GameObject.Find(CASINO));
 
         Battle = GameObject.Find(BATTLE);
         BC = Battle.GetComponent<Battle_C>();
@@ -122,14 +134,11 @@ public class GameManager :MonoBehaviour {
 			float s = (float)root.activeHeight / Screen.height;
 			StandardHeight = Mathf.CeilToInt (Screen.height * s);
 			StandardWidth = Mathf.CeilToInt (Screen.width * s);
-			Debug.Log ("StandardHeight = " + StandardHeight);
-			Debug.Log ("StandardWidth = " + StandardWidth);
 		}
+
         //隐藏所有界面
         foreach (string ui in UIS.Keys)
         {
-            //DontDestroyOnLoad(UIS[ui]);
-            //UIS[ui].SetActive(false);
             Formula.UI_IsVisible(UIS[ui], false);
         }
 
@@ -194,6 +203,12 @@ public class GameManager :MonoBehaviour {
                     break;
             }
         }
+
+		if (desUI == UIS[CASINO])
+		{
+			GameObject.Find(CASINO).GetComponent<Casino>().Enter();
+		}
+
         if (oriUI)
         {
            //oriUI.SetActive(false);

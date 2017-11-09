@@ -53,6 +53,7 @@ public class UICenterOnChild : MonoBehaviour
 	void OnEnable () { if (mScrollView) { mScrollView.centerOnChild = this; Recenter(); } }
 	void OnDisable () { if (mScrollView) mScrollView.centerOnChild = null; }
 	void OnDragFinished () { if (enabled) Recenter(); }
+	void onStoppedMoving() { if (enabled) Recenter(); }
 
 	/// <summary>
 	/// Ensure that the threshold is always positive.
@@ -83,6 +84,8 @@ public class UICenterOnChild : MonoBehaviour
 				{
 					mScrollView.centerOnChild = this;
 					mScrollView.onDragFinished += OnDragFinished;
+					//在停止时重新居中一下
+					mScrollView.onStoppedMoving += onStoppedMoving;
 				}
 
 				if (mScrollView.horizontalScrollBar != null)

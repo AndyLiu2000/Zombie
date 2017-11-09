@@ -123,6 +123,15 @@ public class BuildAssetBundle : Editor {
         AssetImporter import12 = AssetImporter.GetAtPath(HolderPath(ExcelAccess.SPLIST));
         import12.assetBundleName = ExcelAccess.SPLIST;
 
+		//Create Cards.asset
+		Cards_Excel holder13 = ScriptableObject.CreateInstance<Cards_Excel>();
+
+		holder13.Card = ExcelAccess.SelectCardsTable(1);
+
+		AssetDatabase.CreateAsset(holder13, HolderPath(ExcelAccess.CARDS));
+		AssetImporter import13 = AssetImporter.GetAtPath(HolderPath(ExcelAccess.CARDS));
+		import13.assetBundleName = ExcelAccess.CARDS;
+
         Debug.Log("BuildAsset Success!");
     }
 

@@ -11,6 +11,7 @@ public class Main_C : MonoBehaviour {
     public GameObject Gem;
 
     public GameObject Main_StartBtn;
+	public GameObject Main_CasinoBtn;
     public GameObject Main_DNABtn;
     public GameObject Main_OptionBtn;
     public GameObject Main_ShopBtn;
@@ -18,6 +19,7 @@ public class Main_C : MonoBehaviour {
     private void Start()
     {
         UIEventListener.Get(Main_StartBtn).onClick = Main_StartBtn_Click;
+		UIEventListener.Get(Main_CasinoBtn).onClick = Main_CasinoBtn_Click;
         UIEventListener.Get(Main_DNABtn).onClick = Main_DNABtn_Click;
         UIEventListener.Get(Main_OptionBtn).onClick = Main_OptionBtn_Click;
         UIEventListener.Get(Main_ShopBtn).onClick = Main_ShopBtn_Click;
@@ -37,6 +39,13 @@ public class Main_C : MonoBehaviour {
         Debug.Log("StartBtn_Click");
 		GameManager.ChangePanel(GameManager.UIS[GameManager.MAIN], GameManager.UIS[GameManager.VIRUSSELECT],0);
     }
+
+	public void Main_CasinoBtn_Click(GameObject button)
+	{
+		Debug.Log("CasinoBtn_Click");
+		GameManager.ChangePanel(GameManager.UIS[GameManager.MAIN], GameManager.UIS[GameManager.CASINO],0);
+		AudioManager.playMusicByName(AudioManager.CasinoBGM);
+	}
 
     public void Main_DNABtn_Click(GameObject b)
     {

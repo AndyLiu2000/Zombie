@@ -34,8 +34,10 @@ public class DataManager : MonoBehaviour {
     public static List<Infection_Sheet> InfectionSheet;
     public static List<Damage_Sheet> DamageSheet;
 
+	public static IList<Cards_Sheet> Cards_Card;
+
     //内部读数据需要用到的属性
-    private static string[] assetNames = { "BattleEvent","BattleStrategy", "DNAUp", "IAP","InGameEvent", "Language", "Loot", "Mission", "Model", "SpecialAbility", "Unlock","SPList" };
+    private static string[] assetNames = { "BattleEvent","BattleStrategy", "DNAUp", "IAP","InGameEvent", "Language", "Loot", "Mission", "Model", "SpecialAbility", "Unlock","SPList","Cards" };
 
     public static void ReadDatas()
     {
@@ -67,6 +69,8 @@ public class DataManager : MonoBehaviour {
 
         InfectionSheet = (Resources.Load<Object>("Datas/" + assetNames[11]) as SPList).InfectionSheet;
         DamageSheet = (Resources.Load<Object>("Datas/" + assetNames[11]) as SPList).DamageSheet;
+
+		Cards_Card = (Resources.Load<Object>("Datas/" + assetNames[12]) as Cards_Excel).Card;
     }
 
 }

@@ -39,22 +39,17 @@ public class Option_C : MonoBehaviour {
         LabelLanguage.text = LocalizationEx.LoadLanguageTextName("Language");
     }
 
-    // Update is called once per frame
-    void Update() {
-        AudioManager.ChangeBGVolumeTo(musicBarSlider.value);
-        AudioManager.ChangeMEToggle(soundToggle.value);
-    }
+	public void UpdateMusic(GameObject b){
+		AudioManager.ChangeBGVolumeTo(b.GetComponent<UISlider>().value);
+	}
+
+	public void UpdateME(GameObject b){
+		AudioManager.ChangeMEToggle(b.GetComponent<UIToggle>().value);
+	}
 
     public void Option_BackBtn_Click(GameObject b)
     {
-        Debug.Log("BackBtn_Click");
-
-        //音量存档
-        AudioManager.BgVolume = musicBarSlider.value;
-        AudioManager.IsSoundOn = soundToggle.value;
-
-        PlayerPrefs.SetFloat("MusicVolume", AudioManager.BgVolume);
-        PlayerPrefs.SetString("IsSoundOn", AudioManager.IsSoundOn.ToString());
+		Debug.Log ("BackBtn_Click");
 
         //处理存储音量
 

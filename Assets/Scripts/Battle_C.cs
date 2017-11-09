@@ -186,7 +186,6 @@ public class Battle_C : MonoBehaviour {
 
 		UpgradeMapWidth = (int)GameObject.Find("UpgradeMapBG").GetComponent<UISprite>().width;
 		UpgradeMapHeigth = (int)GameObject.Find("UpgradeMapBG").GetComponent<UISprite>().height;
-		Debug.Log ("UpgradeMapWidth = " + UpgradeMapWidth);
     }
 
     //接收不同模式的数据，方便以后独立处理，Enter结束之后才开始Update. init mode data

@@ -959,7 +959,9 @@ public class UIScrollView : MonoBehaviour
 		// Apply momentum
 		if (!mPressed)
 		{
-			if (mMomentum.magnitude > 0.0001f || Mathf.Abs(mScroll) > 0.0001f)
+			//这是原版代码,不等于0的条件太宽松了，总也达不到，导致触发不了stop，这里把值改大，使他快速停下来
+			//if (mMomentum.magnitude > 0.0001f || Mathf.Abs(mScroll) > 0.0001f)
+			if (mMomentum.magnitude > 0.0001f || mScroll > 0.1f)
 			{
 				if (movement == Movement.Horizontal)
 				{
